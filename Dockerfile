@@ -12,15 +12,15 @@ RUN echo "0bfd792196ce0ec6f1c65d2a9ad00215b2926ef2c416b8d97615265194477117  acti
 RUN tar xzf ./actions-runner-linux-x64-2.298.2.tar.gz
 RUN rm actions-runner-linux-x64-2.298.2.tar.gz
 
-RUN	bash bin/installdependencies.sh
+# RUN	bash bin/installdependencies.sh
 
-COPY entrypoint.sh /actions-runner/entrypoint.sh
+# COPY entrypoint.sh /actions-runner/entrypoint.sh
 
-RUN useradd github && \
-    echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
-    usermod -aG sudo github && \
-    chown -R github:github /actions-runner && \
-    chmod +x /actions-runner/entrypoint.sh
+# RUN useradd github && \
+#     echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#     usermod -aG sudo github && \
+#     chown -R github:github /actions-runner && \
+#     chmod +x /actions-runner/entrypoint.sh
 
-USER github
-ENTRYPOINT ["/actions-runner/entrypoint.sh"]
+# USER github
+# ENTRYPOINT ["/actions-runner/entrypoint.sh"]
