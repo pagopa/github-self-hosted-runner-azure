@@ -14,6 +14,8 @@ RUN tar xzf ./actions-runner-linux-x64-2.298.2.tar.gz
 
 WORKDIR /
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 RUN rm actions-runner/actions-runner-linux-x64-2.298.2.tar.gz
 RUN	bash actions-runner/bin/installdependencies.sh
 
