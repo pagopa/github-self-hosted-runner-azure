@@ -3,7 +3,7 @@ FROM ubuntu:22.04@sha256:a8fe6fd30333dc60fc5306982a7c51385c2091af1e0ee887166b40a
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apt-get update
-RUN apt-get install curl sudo -y
+RUN apt-get install curl sudo bash -y
 
 # Create a folder
 RUN mkdir actions-runner && cd actions-runner
