@@ -15,9 +15,9 @@ RUN curl -o actions-runner-linux-x64-2.298.2.tar.gz -L https://github.com/action
 RUN	bash bin/installdependencies.sh
 
 RUN useradd github && \
-    usermod -aG sudo github && \
     chown -R github:github /actions-runner
-# echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+#     usermod -aG sudo github && \
+#     echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
