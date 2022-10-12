@@ -1,7 +1,6 @@
 FROM ubuntu:22.04@sha256:a8fe6fd30333dc60fc5306982a7c51385c2091af1e0ee887166b40a905691fd0
 
 RUN apt-get update
-# RUN apt-get install curl sudo bash -y
 RUN apt-get install curl -y
 
 # Create a folder
@@ -15,13 +14,16 @@ RUN curl -o actions-runner-linux-x64-2.298.2.tar.gz -L https://github.com/action
 
 RUN	bash bin/installdependencies.sh
 
-COPY entrypoint.sh /actions-runner/entrypoint.sh
-
 RUN useradd github && \
-    echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
     usermod -aG sudo github && \
-    chown -R github:github /actions-runner && \
-    chmod +x /actions-runner/entrypoint.sh
+    chown -R github:github /actions-runner
+# echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER github
-ENTRYPOINT ["/actions-runner/entrypoint.sh"]
+
+WORKDIR /
+
+ENTRYPOINT ["/entrypoint.sh"]
