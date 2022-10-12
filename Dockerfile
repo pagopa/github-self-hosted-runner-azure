@@ -16,8 +16,6 @@ RUN	bash bin/installdependencies.sh
 
 RUN useradd github && \
     chown -R github:github /actions-runner
-#     usermod -aG sudo github && \
-#     echo "github ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
