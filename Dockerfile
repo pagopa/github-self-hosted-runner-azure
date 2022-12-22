@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y curl
 RUN mkdir actions-runner
 WORKDIR actions-runner
 
-RUN GITHUB_RUNNER_VERSION="2.298.2" && \
-    GITHUB_RUNNER_VERSION_SHA="0bfd792196ce0ec6f1c65d2a9ad00215b2926ef2c416b8d97615265194477117" && \
+RUN GITHUB_RUNNER_VERSION="2.299.1" && \
+    GITHUB_RUNNER_VERSION_SHA="147c14700c6cb997421b9a239c012197f11ea9854cd901ee88ead6fe73a72c74" && \
     curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz && \
     echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c && \
     tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz && \
@@ -55,7 +55,7 @@ RUN apt-get update && apt-get -y install jq
 
 # install yq from https://github.com/mikefarah/yq#install
 
-RUN YQ_VERSION="v4.28.2" && \
+RUN YQ_VERSION="v4.30.6" && \
     YQ_BINARY="yq_linux_amd64" && \
     wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
 
