@@ -1,6 +1,6 @@
 FROM ubuntu:22.04@sha256:a8fe6fd30333dc60fc5306982a7c51385c2091af1e0ee887166b40a905691fd0
 
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl git
 
 # Create a folder
 RUN mkdir actions-runner
@@ -39,7 +39,7 @@ RUN apt-get -y install python-pip
 
 RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-    
+
 RUN apt-get update && apt-get -y install kubectl
 
 # install helm from https://helm.sh/docs/intro/install/#from-apt-debianubuntu
