@@ -1,3 +1,4 @@
+# from https://hub.docker.com/_/ubuntu/tags?page=1&name=22.04
 FROM ubuntu:22.04@sha256:a8fe6fd30333dc60fc5306982a7c51385c2091af1e0ee887166b40a905691fd0
 
 RUN apt-get update && apt-get install -y curl git
