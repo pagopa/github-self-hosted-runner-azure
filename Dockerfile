@@ -6,8 +6,9 @@ RUN apt-get update && apt-get install -y curl git
 RUN mkdir actions-runner
 WORKDIR actions-runner
 
-RUN GITHUB_RUNNER_VERSION="2.299.1" && \
-    GITHUB_RUNNER_VERSION_SHA="147c14700c6cb997421b9a239c012197f11ea9854cd901ee88ead6fe73a72c74" && \
+# from https://github.com/actions/runner/releases
+RUN GITHUB_RUNNER_VERSION="2.300.2" && \
+    GITHUB_RUNNER_VERSION_SHA="ed5bf2799c1ef7b2dd607df66e6b676dff8c44fb359c6fedc9ebf7db53339f0c" && \
     curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz && \
     echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c && \
     tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz && \
