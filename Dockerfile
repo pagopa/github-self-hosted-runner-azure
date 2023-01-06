@@ -5,11 +5,6 @@ COPY install_script.sh install_script.sh
 
 RUN bash install_script.sh
 
-RUN useradd github && \
-    mkdir -p /home/github && \
-    chown -R github:github /home/github && \
-    chown -R github:github /actions-runner
-
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

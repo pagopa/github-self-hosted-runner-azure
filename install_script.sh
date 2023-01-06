@@ -57,3 +57,10 @@ apt-get update && apt-get -y install jq
 YQ_VERSION="v4.30.6"
 YQ_BINARY="yq_linux_amd64"
 wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
+
+###
+
+useradd github
+mkdir -p /home/github
+chown -R github:github /home/github && \
+chown -R github:github /actions-runner
