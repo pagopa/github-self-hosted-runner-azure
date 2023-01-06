@@ -62,5 +62,5 @@ wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY
 
 useradd github
 mkdir -p /home/github
-chown -R github:github /home/github && \
+chown -R github:github /home/github
 chown -R github:github /actions-runner
