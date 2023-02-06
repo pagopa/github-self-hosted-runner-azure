@@ -82,4 +82,7 @@ RUN whoami && \
     helm --help && \
     yq --version
 
-# ENTRYPOINT ["/entrypoint.sh"]
+
+
+# ENTRYPOINT ["/bin/bash","-c", "/entrypoint.sh"]
+# CMD ["entrypoint.sh"]
