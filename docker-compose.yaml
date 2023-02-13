@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  github_runner:
+    build: .
+    environment:
+      - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+
