@@ -1,9 +1,9 @@
-name: Release docker on dev branch
+name: Beta docker on dev branch
 
 on:
   push:
     # Sequence of patterns matched against refs/heads
-    branches-ignore:    
+    branches-ignore:
       - 'main'
     paths-ignore:
       - 'CODEOWNERS'
@@ -12,7 +12,7 @@ on:
 
 jobs:
   release:
-    name: Release docker on dev branch
+    name: Beta docker on dev branch
     runs-on: ubuntu-22.04
 
     steps:
@@ -41,8 +41,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:beta-${{ github.ref_name }}
           labels: |
             maintainer=https://pagopa.it
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
