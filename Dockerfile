@@ -15,6 +15,7 @@ USER github
 RUN whoami && \
     az --version && \
     kubectl --help && \
+    kubelogin --version && \
     helm --help && \
     yq --version
 

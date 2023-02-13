@@ -36,7 +36,8 @@ curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee
 AZ_REPO=$(lsb_release -cs)
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list
 
-apt-get update && apt-get -y install azure-cli
+apt-get update \
+  && apt-get -y install azure-cli
 
 az config set extension.use_dynamic_install=yes_without_prompt
 
@@ -61,6 +62,9 @@ apt-get update \
 YQ_VERSION="v4.30.6"
 YQ_BINARY="yq_linux_amd64"
 wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
+
+# Kubelogin install (use kubectl to install packages)
+az aks install-cli --kubelogin-version "0.0.26"
 
 #
 # USER CONFIGURATIONS
