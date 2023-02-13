@@ -6,7 +6,7 @@ WORKDIR /
 COPY install_script.sh install_script.sh
 RUN bash install_script.sh
 
-COPY entrypoint.sh /entrypoint.sh
+COPY github-runner-entrypoint.sh /github-runner-entrypoint.sh
 RUN chmod +x /github-runner-entrypoint.sh
 
 # changed user to avoid root user
