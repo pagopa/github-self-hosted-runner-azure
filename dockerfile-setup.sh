@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "[INFO] Start apt get install base packages"
+
 apt-get update \
     && apt-get -y install curl git vim \
     && apt-get -y install zip unzip \
@@ -11,6 +13,7 @@ apt-get update \
 #
 # Github Action runner
 #
+echo "[INFO] Install github action runner"
 mkdir -p actions-runner
 cd actions-runner || exit
 
@@ -27,6 +30,8 @@ bash bin/installdependencies.sh
 #
 # AZCLI
 #
+echo "[INFO] Install azcli"
+
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
 AZ_REPO=$(lsb_release -cs)
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list
@@ -39,6 +44,7 @@ az config set extension.use_dynamic_install=yes_without_prompt
 # KUBERNETES DEPENDENCIES
 #
 # install kubectl from https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-using-native-package-management
+echo "[INFO] Install kubernetes"
 
 curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
