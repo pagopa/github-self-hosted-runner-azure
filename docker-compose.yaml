@@ -1,7 +1,8 @@
 version: "3.9"
 services:
   github_runner:
-    build: .
+    # build: .
+    image: ghcr.io/pagopa/github-self-hosted-runner-azure:beta-kubelogin-setup
     environment:
       - GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
