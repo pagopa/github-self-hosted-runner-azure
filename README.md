@@ -12,3 +12,5 @@ Every time you want to update the runner you have to do the following:
   * the sha of the `actions-runner-linux-x64` version these two info must be inserted in the Dockerfile respectively in the variable: `ENV_GITHUB_RUNNER_VERSION` and `ENV_GITHUB_RUNNER_VERSION_SHA`
 
 * run a local build
+
+* Push your code and be sure that the action `beta-docker-branch` runs correctly
