@@ -7,6 +7,7 @@ ENV ENV_GITHUB_RUNNER_VERSION_SHA=9f994158d49c5af39f57a65bf1438cbae4968aec1e4fec
 # https://github.com/Azure/kubelogin/blob/master/CHANGELOG.md
 ENV ENV_KUBELOGIN_VERSION=0.0.31
 ENV ENV_YQ_VERSION="v4.30.6"
+ENV NODE_MAJOR_VERSION="20"
 
 WORKDIR /
 
@@ -24,6 +25,9 @@ RUN whoami && \
   kubectl --help && \
   kubelogin --version && \
   helm --help && \
-  yq --version
+  yq --version && \
+  node --version && \
+  npm --version && \
+  yarn --version
 
 ENTRYPOINT ["/github-runner-entrypoint.sh"]
