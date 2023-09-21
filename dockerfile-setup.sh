@@ -30,7 +30,7 @@ echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VER
 tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 rm actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 # 2) 1.09GB
-bash bin/installdependencies.sh
+# bash bin/installdependencies.sh
 echo "✅ Installed > github action runner"
 # 3) 1.13GB
 
