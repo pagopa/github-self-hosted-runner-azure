@@ -2,13 +2,15 @@
 
 echo "✅ Start apt get install base packages"
 
-apt-get update \
-    && apt-get -y install curl git vim \
-    && apt-get -y install zip unzip \
-    && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
-    && apt-get -y install jq \
-    && apt-get satisfy "python3-pip  (<= 22.1)" -y
-    # install jq from https://stedolan.github.io/jq/download/
+# apt-get update \
+#     && apt-get -y install curl git vim \
+#     && apt-get -y install zip unzip \
+#     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
+#     && apt-get -y install jq \
+#     && apt-get satisfy "python3-pip  (<= 22.1)" -y
+#     # install jq from https://stedolan.github.io/jq/download/
+
+# 1) 554mb
 
 # Test whoami
 whoami
@@ -22,15 +24,16 @@ mkdir -p actions-runner
 cd actions-runner || exit
 
 # from https://github.com/actions/runner/releases
-GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.305.0}"
-GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-737bdcef6287a11672d6a5a752d70a7c96b4934de512b7eb283be6f51a563f2f}"
+GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.309.0}"
+GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-2974243bab2a282349ac833475d241d5273605d3628f0685bd07fb5530f9bb1a}"
 curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c
 tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 rm actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
-
+# 2) 1.09GB
 bash bin/installdependencies.sh
 echo "✅ Installed > github action runner"
+# 3) 1.13GB
 
 #
 # AZCLI
@@ -48,7 +51,7 @@ az config set extension.use_dynamic_install=yes_without_prompt
 az --version
 echo "✅ Installed > azcli"
 
-## Node and Yarn install 
+## Node and Yarn install
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
 NODE_MAJOR_VERSION="${ENV_NODE_MAJOR_VERSION:-20}"
 echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list

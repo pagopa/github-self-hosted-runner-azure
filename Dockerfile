@@ -2,14 +2,23 @@
 FROM ubuntu:22.04@sha256:965fbcae990b0467ed5657caceaec165018ef44a4d2d46c7cdea80a9dff0d1ea
 
 # see readme to understand wich version and use to use
-ENV ENV_GITHUB_RUNNER_VERSION="2.308.0"
-ENV ENV_GITHUB_RUNNER_VERSION_SHA=9f994158d49c5af39f57a65bf1438cbae4968aec1e4fec132dd7992ad57c74fa
+ENV ENV_GITHUB_RUNNER_VERSION="2.309.0"
+ENV ENV_GITHUB_RUNNER_VERSION_SHA=2974243bab2a282349ac833475d241d5273605d3628f0685bd07fb5530f9bb1a
 # https://github.com/Azure/kubelogin/blob/master/CHANGELOG.md
 ENV ENV_KUBELOGIN_VERSION=0.0.31
 ENV ENV_YQ_VERSION="v4.30.6"
 ENV NODE_MAJOR_VERSION="20"
 
 WORKDIR /
+
+RUN apt-get update && \
+    apt-get install -y curl jq && \
+    apt-get -y install curl git vim && \
+    apt-get -y install zip unzip && \
+    apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg && \
+    apt-get satisfy "python3-pip  (<= 22.1)" -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY dockerfile-setup.sh dockerfile-setup.sh
 RUN bash dockerfile-setup.sh
