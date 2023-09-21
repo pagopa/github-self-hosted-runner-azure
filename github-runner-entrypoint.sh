@@ -53,7 +53,7 @@
 # printf "Executing GitHub Runner for %s\n" "$GITHUB_REPOSITORY"
 # ./actions-runner/run.sh
 
-printf "Before token: $GITHUB_PAT; $REGISTRATION_TOKEN_API_URL;\n"
+printf "Before token: $REPO_URL; $GITHUB_PAT; $REGISTRATION_TOKEN_API_URL;\n"
 
 # Retrieve a short lived runner registration token using the PAT
 REGISTRATION_TOKEN="$(curl -X POST -fsSL \
@@ -63,7 +63,7 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   "$REGISTRATION_TOKEN_API_URL" \
   | jq -r '.token')"
 
-printf "After token: $REPO_URL; $REGISTRATION_TOKEN;\n"
+printf "After token: $REGISTRATION_TOKEN;\n"
 
 ls ./actions-runner -l
 # ls ./actions-runner/bin -l
