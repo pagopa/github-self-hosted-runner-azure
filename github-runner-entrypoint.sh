@@ -5,28 +5,28 @@ if [ "$(echo "$INTERACTIVE_MODE" | tr '[:upper:]' '[:lower:]')" == "true" ]; the
 	INTERACTIVE="TRUE"
 fi
 
-# Verify some Repo URL and token have been given, otherwise we must be interactive mode.
-if [ -z "$GITHUB_REPOSITORY" ] || [ -z "$GITHUB_TOKEN" ]; then
-	if [ "$INTERACTIVE" == "FALSE" ]; then
-		echo "GITHUB_REPOSITORY and GITHUB_TOKEN cannot be empty"
-		exit 1
-	fi
-fi
+# # Verify some Repo URL and token have been given, otherwise we must be interactive mode.
+# if [ -z "$GITHUB_REPOSITORY" ] || [ -z "$GITHUB_TOKEN" ]; then
+# 	if [ "$INTERACTIVE" == "FALSE" ]; then
+# 		echo "GITHUB_REPOSITORY and GITHUB_TOKEN cannot be empty"
+# 		exit 1
+# 	fi
+# fi
 
-# Calculate default configuration values.
-GITHUB_REPOSITORY_BANNER="$GITHUB_REPOSITORY"
-if [ -z "$GITHUB_REPOSITORY_BANNER" ]; then
-	export GITHUB_REPOSITORY_BANNER="<empty repository url>"
-fi
+# # Calculate default configuration values.
+# GITHUB_REPOSITORY_BANNER="$GITHUB_REPOSITORY"
+# if [ -z "$GITHUB_REPOSITORY_BANNER" ]; then
+# 	export GITHUB_REPOSITORY_BANNER="<empty repository url>"
+# fi
 
-if [ -z "$RUNNER_NAME" ]; then
-	RUNNER_NAME="$(hostname)"
-  export RUNNER_NAME
-fi
+# if [ -z "$RUNNER_NAME" ]; then
+# 	RUNNER_NAME="$(hostname)"
+#   export RUNNER_NAME
+# fi
 
-if [ -z "$WORK_DIR" ]; then
-	export WORK_DIR=".workdir"
-fi
+# if [ -z "$WORK_DIR" ]; then
+# 	export WORK_DIR=".workdir"
+# fi
 
 # # Calculate runner replacement policy.
 # REPLACEMENT_POLICY="\n\n\n"
