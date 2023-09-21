@@ -7,7 +7,7 @@ apt-get update \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
     && apt-get -y install jq \
-    && apg-get -y install libicu~=63 \
+    && apt-get -y install libicu~=63 \
     && apt-get -y install icu-libs~=73 \
     && apt-get -y install icu-data-full~=73 \
     && apt-get satisfy "python3-pip  (<= 22.1)" -y
@@ -26,14 +26,14 @@ echo "✅ whoami > run as expected"
 mkdir -p actions-runner
 cd actions-runner || exit
 # from https://github.com/actions/runner/releases
-GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.309.0}"
-GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-2974243bab2a282349ac833475d241d5273605d3628f0685bd07fb5530f9bb1a}"
+GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.305.0}"
+GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-737bdcef6287a11672d6a5a752d70a7c96b4934de512b7eb283be6f51a563f2f}"
 curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c
 tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 rm actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 # 2) 1.09GB
-# bash bin/installdependencies.sh
+bash bin/installdependencies.sh
 echo "✅ Installed > github action runner"
 # 3) 1.13GB
 
