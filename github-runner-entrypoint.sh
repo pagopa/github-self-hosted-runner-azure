@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 printf "Before token: $REPO_URL; $GITHUB_PAT; $REGISTRATION_TOKEN_API_URL;\n"
 
 # Retrieve a short lived runner registration token using the PAT
