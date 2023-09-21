@@ -39,7 +39,7 @@
 # # Configure runner interactively, or with the given replacement policy.
 # printf "Configuring GitHub Runner for %s\n\t" "$GITHUB_REPOSITORY_BANNER"
 # printf "Runner Name: %s\n\t" "$RUNNER_NAME"
-# printf "Working Directory: %s\n\t" "$WORK_DIR"
+printf "Working Directory: %s\n\t" "$WORK_DIR"
 # printf "Replace Existing Runners: %s\n" "$REPLACEMENT_POLICY_LABEL"
 
 # # actions-runner is a folder inside the github runner zip
@@ -55,7 +55,6 @@
 
 printf "Diagnostic: $GITHUB_PAT - $REGISTRATION_TOKEN_API_URL"
 
-printf "Preparing REST call"
 # Retrieve a short lived runner registration token using the PAT
 REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   -H 'Accept: application/vnd.github.v3+json' \
@@ -64,6 +63,14 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   "$REGISTRATION_TOKEN_API_URL" \
   | jq -r '.token')"
 
-printf "REST: done - $REGISTRATION_TOKEN"
+printf "Diagnostic: $GITHUB_REPOSITORY; $REGISTRATION_TOKEN;"
 
-./actions-runner/config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate && ./actions-runner/run.sh
+ls
+ls ./actions-runner
+ls ./actions/runner/bin
+
+./actions-runner/config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate
+
+printf "config run successfully"
+
+./actions-runner/run.sh
