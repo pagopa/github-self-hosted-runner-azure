@@ -61,4 +61,4 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   "$REGISTRATION_TOKEN_API_URL" \
   | jq -r '.token')"
 
-./config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate && ./run.sh
+./actions-runner/config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate && ./actions-runner/run.sh
