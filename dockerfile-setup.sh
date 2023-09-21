@@ -7,9 +7,9 @@ apt-get update \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
     && apt-get -y install jq
-    && apg-get -y libicu \
-    && apt-get -y icu-libs~=73 \
-    && apt-get -y icu-data-full~=73 \
+    && apg-get -y install libicu~=63 \
+    && apt-get -y install icu-libs~=73 \
+    && apt-get -y install icu-data-full~=73 \
     && apt-get satisfy "python3-pip  (<= 22.1)" -y
     # install jq from https://stedolan.github.io/jq/download/
 
