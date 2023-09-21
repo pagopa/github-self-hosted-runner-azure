@@ -6,7 +6,7 @@ apt-get update \
     && apt-get -y install curl git vim \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
-    && apt-get -y install jq
+    && apt-get -y install jq \
     && apg-get -y install libicu~=63 \
     && apt-get -y install icu-libs~=73 \
     && apt-get -y install icu-data-full~=73 \
