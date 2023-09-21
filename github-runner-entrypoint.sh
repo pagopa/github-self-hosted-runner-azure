@@ -65,7 +65,7 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
 
 printf "After token: $REGISTRATION_TOKEN;\n"
 
-./actions-runner/config.sh --url $REPO_URL --token $REGISTRATION_TOKEN --unattended --ephemeral
+./actions-runner/config.sh --url $REPO_URL --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate
 
 printf "config run successfully\n"
 
