@@ -53,7 +53,7 @@ printf "Working Directory: %s\n\t" "$WORK_DIR"
 # printf "Executing GitHub Runner for %s\n" "$GITHUB_REPOSITORY"
 # ./actions-runner/run.sh
 
-printf "Diagnostic: $GITHUB_PAT - $REGISTRATION_TOKEN_API_URL"
+printf "Diagnostic: $GITHUB_PAT - $REGISTRATION_TOKEN_API_URL\n"
 
 # Retrieve a short lived runner registration token using the PAT
 REGISTRATION_TOKEN="$(curl -X POST -fsSL \
@@ -63,14 +63,14 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   "$REGISTRATION_TOKEN_API_URL" \
   | jq -r '.token')"
 
-printf "Diagnostic: $GITHUB_REPOSITORY; $REGISTRATION_TOKEN;"
+printf "Diagnostic: $REPO_URL; $REGISTRATION_TOKEN;\n"
 
 ls
 ls ./actions-runner
 ls ./actions/runner/bin
 
-./actions-runner/config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate
+./actions-runner/config.sh --url $REPO_URL --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate
 
-printf "config run successfully"
+printf "config run successfully\n"
 
 ./actions-runner/run.sh
