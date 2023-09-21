@@ -11,14 +11,14 @@ ENV NODE_MAJOR_VERSION="20"
 
 WORKDIR /
 
-RUN apt-get update && \
-    apt-get install -y curl jq && \
-    apt-get -y install curl git vim && \
-    apt-get -y install zip unzip && \
-    apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg && \
-    apt-get satisfy "python3-pip  (<= 22.1)" -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+#     apt-get install -y curl jq && \
+#     apt-get -y install curl git vim && \
+#     apt-get -y install zip unzip && \
+#     apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg && \
+#     apt-get satisfy "python3-pip  (<= 22.1)" -y && \
+#     apt-get clean && \
+#     rm -rf /var/lib/apt/lists/*
 
 COPY dockerfile-setup.sh dockerfile-setup.sh
 RUN bash dockerfile-setup.sh

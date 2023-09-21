@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-INTERACTIVE="FALSE"
-if [ "$(echo "$INTERACTIVE_MODE" | tr '[:upper:]' '[:lower:]')" == "true" ]; then
-	INTERACTIVE="TRUE"
-fi
+# INTERACTIVE="FALSE"
+# if [ "$(echo "$INTERACTIVE_MODE" | tr '[:upper:]' '[:lower:]')" == "true" ]; then
+# 	INTERACTIVE="TRUE"
+# fi
 
 # # Verify some Repo URL and token have been given, otherwise we must be interactive mode.
 # if [ -z "$GITHUB_REPOSITORY" ] || [ -z "$GITHUB_TOKEN" ]; then
@@ -53,6 +53,9 @@ fi
 # printf "Executing GitHub Runner for %s\n" "$GITHUB_REPOSITORY"
 # ./actions-runner/run.sh
 
+printf "Diagnostic: $GITHUB_PAT - $REGISTRATION_TOKEN_API_URL"
+
+printf "Preparing REST call"
 # Retrieve a short lived runner registration token using the PAT
 REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   -H 'Accept: application/vnd.github.v3+json' \
@@ -60,5 +63,7 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   -H 'X-GitHub-Api-Version: 2022-11-28' \
   "$REGISTRATION_TOKEN_API_URL" \
   | jq -r '.token')"
+
+printf "REST: done - $REGISTRATION_TOKEN"
 
 ./actions-runner/config.sh --url $GITHUB_REPOSITORY --token $REGISTRATION_TOKEN --unattended --ephemeral --disableupdate && ./actions-runner/run.sh
