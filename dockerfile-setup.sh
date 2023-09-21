@@ -7,6 +7,7 @@ apt-get update \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
     && apt-get -y install jq \
+    && apt-get -y libicu \
     && apt-get satisfy "python3-pip  (<= 22.1)" -y
     # install jq from https://stedolan.github.io/jq/download/
 
