@@ -2,7 +2,7 @@
 FROM ubuntu:22.04@sha256:965fbcae990b0467ed5657caceaec165018ef44a4d2d46c7cdea80a9dff0d1ea
 
 # see readme to understand wich version and use to use
-ENV ENV_GITHUB_RUNNER_VERSION="2.309.0"
+ENV ENV_GITHUB_RUNNER_VERSION="2.305.0"
 ENV ENV_GITHUB_RUNNER_VERSION_SHA=2974243bab2a282349ac833475d241d5273605d3628f0685bd07fb5530f9bb1a
 # https://github.com/Azure/kubelogin/blob/master/CHANGELOG.md
 ENV ENV_KUBELOGIN_VERSION=0.0.31
