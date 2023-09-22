@@ -57,7 +57,7 @@ RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/h
 # # 7) 1.98GB
 
 RUN apt-get update \
-    && apt-get satisfy "kubectl" -y \
+    # && apt-get satisfy "kubectl" -y \
     && apt-get satisfy "helm" -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
