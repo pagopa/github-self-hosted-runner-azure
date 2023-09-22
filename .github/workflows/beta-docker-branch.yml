@@ -10,6 +10,10 @@ on:
       - '**.md'
       - '.**'
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   release:
     name: Beta docker on dev branch
@@ -24,6 +28,9 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+
       - name: Log in to the Container registry
         id: docker_login
         # from https://github.com/docker/login-action/commits/master
@@ -33,6 +40,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=raw,value=beta-${{ github.ref_name }}
+          labels:
+            org.opencontainers.image.title=${{ github.repository }}-beta
+            org.opencontainers.image.description=GitHub self hosted runner
+            org.opencontainers.image.authors=PagoPA
+            org.opencontainers.image.url=github.com/PagoPA/${{ github.repository }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
       - name: Build and push Docker image
         id: docker_build_push
         # from https://github.com/docker/build-push-action/commits/master
@@ -40,8 +63,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:beta-${{ github.ref_name }}
-          labels: |
-            maintainer=https://pagopa.it
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: Dockerfile.github
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
