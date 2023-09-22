@@ -77,39 +77,8 @@ RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BI
 
 # 10) 2.17GB
 
-# RUN whereis yq
-# RUN whereis kubectl
-# RUN whereis helm
-# RUN whereis git
-# RUN whereis node
-# RUN whereis npm
-# RUN whereis yarn
-# RUN whereis az
-# RUN whereis python3
-
 # FROM ghcr.io/actions/actions-runner:2.309.0 AS final
 FROM deps-yq AS final
-
-# USER root
-
-# COPY --from=deps-yq /usr/bin/yq /usr/bin/yq
-# COPY --from=deps-yq /usr/local/bin/kubectl /usr/local/bin/kubectl
-# COPY --from=deps-yq /usr/local/bin/kubelogin /usr/local/bin/kubelogin
-# COPY --from=deps-yq /usr/bin/helm /usr/bin/helm
-# COPY --from=deps-yq /usr/sbin/helm /usr/sbin/helm
-# COPY --from=deps-yq /usr/bin/git /usr/bin/git
-# COPY --from=deps-yq /usr/bin/yarn /usr/bin/yarn
-# COPY --from=deps-yq /usr/bin/npm /usr/bin/npm
-# COPY --from=deps-yq /usr/bin/node /usr/bin/node
-# COPY --from=deps-yq /usr/include/node /usr/include/node
-# COPY --from=deps-yq /usr/include/node /usr/include/node
-# COPY --from=deps-yq /usr/bin/az /usr/bin/az
-# COPY --from=deps-yq /opt/az/bin/az /opt/az/bin/az
-# COPY --from=deps-yq /usr/bin/python3 /usr/bin/python3
-# COPY --from=deps-yq /usr/lib/python3 /usr/lib/python3
-# COPY --from=deps-yq /etc/python3 /etc/python3
-# COPY --from=deps-yq /usr/share/python3 /usr/share/python3
-# COPY --from=deps-yq /opt/az/bin/python3 /opt/az/bin/python3
 
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
