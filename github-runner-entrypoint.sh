@@ -15,6 +15,8 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   --ephemeral \
   --disableupdate
 
-export GITHUB_PAT="_REDACTED_"
+export GITHUB_PAT=_REDACTED_
+export REGISTRATION_TOKEN=_REDACTED_
+echo $GITHUB_PAT
 
 ./run.sh
