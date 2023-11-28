@@ -22,8 +22,8 @@ mkdir -p actions-runner
 cd actions-runner || exit
 
 # from https://github.com/actions/runner/releases
-GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.310.2}"
-GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-fb28a1c3715e0a6c5051af0e6eeff9c255009e2eec6fb08bc2708277fbb49f93}"
+GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.311.0}"
+GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-29fc8cf2dab4c195bb147384e7e2c94cfd4d4022c793b346a6175435265aa278}"
 curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c
 tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
