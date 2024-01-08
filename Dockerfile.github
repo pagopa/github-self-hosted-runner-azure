@@ -5,6 +5,7 @@ USER root
 # install curl and jq
 RUN apt-get update && apt-get install -y curl jq && \
     apt-get clean && \
+    apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
