@@ -12,9 +12,9 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   --url $REPO_URL \
   --token $REGISTRATION_TOKEN \
   --unattended \
-  --ephemeral \
-  --disableupdate \
-  --replace
+  --disableupdate
+  # --replace
+  # --ephemeral \
 
 # export GITHUB_PAT=_REDACTED_
 # export REGISTRATION_TOKEN=_REDACTED_
