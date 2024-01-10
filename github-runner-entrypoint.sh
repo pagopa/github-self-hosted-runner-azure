@@ -12,7 +12,6 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   --url $REPO_URL \
   --token $REGISTRATION_TOKEN \
   --unattended \
-  --disableupdate \
   --ephemeral \
   --replace \
   && ./run.sh
