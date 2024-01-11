@@ -13,6 +13,7 @@ REGISTRATION_TOKEN="$(curl -X POST -fsSL \
   --token $REGISTRATION_TOKEN \
   --unattended \
   --ephemeral \
+  --labels $LABELS
   && ./run.sh
 
 # export GITHUB_PAT=_REDACTED_
