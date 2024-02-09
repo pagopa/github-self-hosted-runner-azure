@@ -22,8 +22,8 @@ mkdir -p actions-runner
 cd actions-runner || exit
 
 # from https://github.com/actions/runner/releases
-GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.311.0}"
-GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-29fc8cf2dab4c195bb147384e7e2c94cfd4d4022c793b346a6175435265aa278}"
+GITHUB_RUNNER_VERSION="${ENV_GITHUB_RUNNER_VERSION:-2.313.0}"
+GITHUB_RUNNER_VERSION_SHA="${ENV_GITHUB_RUNNER_VERSION_SHA:-56910d6628b41f99d9a1c5fe9df54981ad5d8c9e42fc14899dcc177e222e71c4}"
 curl -o actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
 echo "${GITHUB_RUNNER_VERSION_SHA}  actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz" | sha256sum -c
 tar xzf ./actions-runner-linux-x64-${GITHUB_RUNNER_VERSION}.tar.gz
@@ -48,7 +48,7 @@ az config set extension.use_dynamic_install=yes_without_prompt
 az --version
 echo "✅ Installed > azcli"
 
-## Node and Yarn install 
+## Node and Yarn install
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
 NODE_MAJOR_VERSION="${ENV_NODE_MAJOR_VERSION:-20}"
 echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
