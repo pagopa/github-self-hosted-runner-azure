@@ -48,11 +48,7 @@ jobs:
           file: Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=min
-          platforms: linux/amd64,linux/arm64
-
-      # - name: debugging
-      #   run: |
-      #     docker buildx ls
+          platforms: linux/amd64
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@d63413b0a4a4482237085319f7f4a1ce99a8f2ac
