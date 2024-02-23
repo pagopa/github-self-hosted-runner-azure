@@ -1,5 +1,4 @@
-FROM ghcr.io/actions/actions-runner:2.312.0 AS base
-# FROM ubuntu:22.04@sha256:965fbcae990b0467ed5657caceaec165018ef44a4d2d46c7cdea80a9dff0d1ea
+FROM ghcr.io/actions/actions-runner:2.313.0 AS base
 USER root
 
 RUN apt-get update \
@@ -11,16 +10,10 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/
 
-# 1) 510/1.21GB (changing base image from ubuntu to gh runner)
-
 FROM base AS deps
-
-# 2) 510/1.21GB (changing base image from ubuntu to gh runner)
-
 RUN bash bin/installdependencies.sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-# 3) 1.22GB (necessary?)
 
 FROM deps AS deps-az
 RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
@@ -33,8 +26,10 @@ RUN apt-get update && \
 
 RUN az config set extension.use_dynamic_install=yes_without_prompt
 
-FROM deps-az AS deps-node-yarn
 # 4) 1.81GB
+
+# rivedere
+FROM deps-az AS deps-node-yarn
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
 ENV NODE_MAJOR_VERSION="${ENV_NODE_MAJOR_VERSION:-20}"
 RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
@@ -47,17 +42,12 @@ RUN apt-get update \
 # 5) 1.98GB
 
 FROM deps-node-yarn AS deps-kube
-# RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-# RUN echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list
-# # 6) 1.98GB
-
 RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
 
 # # 7) 1.98GB
 
 RUN apt-get update \
-    # && apt-get satisfy "kubectl" -y \
     && apt-get satisfy "helm" -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -77,15 +67,11 @@ RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BI
 
 # 10) 2.17GB
 
-# FROM ghcr.io/actions/actions-runner:2.309.0 AS final
 FROM deps-yq AS final
 
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 USER runner
-# RUN mkdir -p /home/github
-# RUN chown -R github:github /home/github
-# RUN chown -R github:github /actions-runner
 
 ENTRYPOINT ["./entrypoint.sh"]
