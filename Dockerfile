@@ -1,12 +1,9 @@
 FROM ghcr.io/actions/actions-runner:2.313.0 AS base
 USER root
-
 RUN apt-get update \
     && apt-get install -y curl jq \
-    && apt-get -y install curl git vim \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
-    && apt-get satisfy "python3-pip (<= 22.1)" -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/
 
@@ -23,55 +20,26 @@ RUN apt-get update && \
     apt-get -y install azure-cli \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
 RUN az config set extension.use_dynamic_install=yes_without_prompt
+ENV KUBELOGIN_VERSION="${ENV_KUBELOGIN_VERSION:-0.0.26}"
+RUN az aks install-cli --kubelogin-version "${KUBELOGIN_VERSION}"
 
-# 4) 1.81GB
-
-# rivedere
-FROM deps-az AS deps-node-yarn
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
-ENV NODE_MAJOR_VERSION="${ENV_NODE_MAJOR_VERSION:-20}"
-RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update \
-    && apt-get -y install nodejs \
-    && npm install -g yarn \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# 5) 1.98GB
-
-FROM deps-node-yarn AS deps-kube
+FROM deps-az AS deps-kube
 RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
-
-# # 7) 1.98GB
-
 RUN apt-get update \
     && apt-get satisfy "helm" -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 8) 2.08GB
-
-ENV KUBELOGIN_VERSION="${ENV_KUBELOGIN_VERSION:-0.0.26}"
-RUN az aks install-cli --kubelogin-version "${KUBELOGIN_VERSION}"
-
-# 9) 2.17GB
-
 FROM deps-kube AS deps-yq
-
 ENV YQ_VERSION="${ENV_YQ_VERSION:-v4.30.6}"
 ENV YQ_BINARY="yq_linux_amd64"
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
 
-# 10) 2.17GB
-
 FROM deps-yq AS final
-
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
-
 USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
