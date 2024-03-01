@@ -1,6 +1,8 @@
 name: Beta docker on dev branch
 
 on:
+  workflow_dispatch:
+
   push:
     branches-ignore:
       - 'main'
