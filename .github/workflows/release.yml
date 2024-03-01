@@ -24,14 +24,14 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           persist-credentials: false
           fetch-depth: 0
 
       - name: Release
         id: release
-        uses: cycjimmy/semantic-release-action@bdd914ff2423e2792c73475f11e8da603182f32d
+        uses: cycjimmy/semantic-release-action@a297eb166c8fba7ddd59ee3c3b873c9781cadc72 # v3.2.0
         with:
           semantic_version: 18.0.0
           extra_plugins: |
