@@ -1,6 +1,7 @@
-FROM ghcr.io/actions/actions-runner:2.313.0 AS base
+FROM ghcr.io/actions/actions-runner:2.314.1 AS base
 USER root
 RUN apt-get update \
+    && apt-get -y install curl git \
     && apt-get install -y curl jq \
     && apt-get -y install zip unzip \
     && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
