@@ -1,5 +1,14 @@
-FROM ghcr.io/actions/actions-runner:2.314.1 AS base
+FROM ghcr.io/actions/actions-runner:2.315.0 AS base
+
+#https://github.com/Azure/kubelogin/releases
+ENV ASK_KUBELOGIN_VERSION="${ENV_ASK_KUBELOGIN_VERSION:-0.1.1}"
+ENV YQ_VERSION="v4.30.6"
+ENV NODE_MAJOR_VERSION="20"
+
+# hadolint ignore=DL3002
 USER root
+
+# Base tools
 RUN apt-get update \
     && apt-get -y install curl git \
     && apt-get install -y curl jq \
@@ -13,6 +22,7 @@ RUN bash bin/installdependencies.sh \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# AZ Cli + AKS kubelogin
 FROM deps AS deps-az
 RUN curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
 RUN AZ_REPO=$(lsb_release -cs) && \
@@ -21,10 +31,10 @@ RUN apt-get update && \
     apt-get -y install azure-cli \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN az config set extension.use_dynamic_install=yes_without_prompt
-ENV KUBELOGIN_VERSION="${ENV_KUBELOGIN_VERSION:-0.0.26}"
-RUN az aks install-cli --kubelogin-version "${KUBELOGIN_VERSION}"
+RUN az config set extension.use_dynamic_install=yes_without_prompt \
+  && az aks install-cli --kubelogin-version "${ASK_KUBELOGIN_VERSION}"
 
+# K8s + HELM
 FROM deps-az AS deps-kube
 RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
 RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
@@ -33,14 +43,14 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# YQ
 FROM deps-kube AS deps-yq
-ENV YQ_VERSION="v4.30.6"
 ENV YQ_BINARY="yq_linux_amd64"
-RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
+RUN wget --progress=dot:giga "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz" -O - | tar xz && mv "${YQ_BINARY}" /usr/bin/yq
 
+# NodeJS
 FROM  deps-yq AS deps-node
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
-ENV NODE_MAJOR_VERSION="20"
 RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update \
     && apt-get -y install nodejs \
@@ -48,8 +58,15 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 FROM deps-node AS final
+RUN echo 2 && echo "az cli: $(az version)" \
+  && echo "kubectl client: $(kubectl version --client -o yaml)" \
+  && echo "helm: $(helm version)" \
+  && echo "yq: $(yq --version)" \
+  && echo "node: $(node --version)"
+WORKDIR /
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
+
 USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
