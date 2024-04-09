@@ -14,3 +14,10 @@ Every time you want to update the runner you have to do the following:
 * run a local build
 
 * Push your code and be sure that the action `beta-docker-branch` runs correctly
+
+## Github agent configuration
+
+You can find all the configurations flags use by `config.sh` in this pages:
+
+* <https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners/autoscaling-with-self-hosted-runners>
+* <https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners>
