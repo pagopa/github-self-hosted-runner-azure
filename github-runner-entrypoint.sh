@@ -90,12 +90,3 @@ else
   export REGISTRATION_TOKEN=_REDACTED_
 
 fi
-
-
-
-
-
-
-
-
-

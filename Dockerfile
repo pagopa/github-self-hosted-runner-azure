@@ -1,5 +1,7 @@
-FROM ghcr.io/actions/actions-runner:2.314.1 AS base
+FROM ghcr.io/actions/actions-runner:2.315.0 AS base
+
 USER root
+
 RUN apt-get update \
     && apt-get -y install curl git \
     && apt-get install -y curl jq \
@@ -50,6 +52,16 @@ RUN apt-get update \
 FROM deps-node AS final
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
+
 USER runner
+
+RUN whoami \
+  && echo "az cli: $(az version)" \
+  && echo "kubectl client: $(kubectl version --client -o yaml)" \
+  && echo "kubelogin client: $(kubelogin --version)" \
+  && echo "helm: $(helm version)" \
+  && echo "yq: $(yq --version)" \
+  && echo "node: $(node --version)" \
+  && echo "npm: $(npm --version)"
 
 ENTRYPOINT ["./entrypoint.sh"]
