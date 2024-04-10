@@ -4,9 +4,9 @@ USER root
 
 RUN apt-get update \
     && apt-get -y install curl git \
-    && apt-get install -y curl jq \
+    && apt-get -y install  jq \
     && apt-get -y install zip unzip \
-    && apt-get -y install ca-certificates curl wget apt-transport-https lsb-release gnupg \
+    && apt-get -y install ca-certificates wget apt-transport-https lsb-release gnupg \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/
 
@@ -40,16 +40,18 @@ ENV YQ_VERSION="v4.30.6"
 ENV YQ_BINARY="yq_linux_amd64"
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
 
-FROM  deps-yq AS deps-node
+FROM  deps-yq AS deps-node-yarn
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg
 ENV NODE_MAJOR_VERSION="20"
 RUN echo "deb [signed-by=/etc/apt/trusted.gpg.d/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update \
     && apt-get -y install nodejs \
+    && sleep  5s \
+    && npm install --global yarn@v1.22.22 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-FROM deps-node AS final
+FROM deps-node-yarn AS final
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
@@ -62,6 +64,7 @@ RUN whoami \
   && echo "helm: $(helm version)" \
   && echo "yq: $(yq --version)" \
   && echo "node: $(node --version)" \
-  && echo "npm: $(npm --version)"
+  && echo "npm: $(npm --version)" \
+  && echo "yarn: $(yarn --version)"
 
 ENTRYPOINT ["./entrypoint.sh"]
