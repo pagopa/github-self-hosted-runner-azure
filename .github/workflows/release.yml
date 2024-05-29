@@ -29,24 +29,22 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Release
-        id: release
-        uses: cycjimmy/semantic-release-action@a297eb166c8fba7ddd59ee3c3b873c9781cadc72 # v3.2.0
-        with:
-          semantic_version: 18.0.0
-          extra_plugins: |
-            @semantic-release/release-notes-generator@10.0.3
-            @semantic-release/git@10.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Release
+      #   id: release
+      #   uses: cycjimmy/semantic-release-action@a297eb166c8fba7ddd59ee3c3b873c9781cadc72 # v3.2.0
+      #   with:
+      #     semantic_version: 18.0.0
+      #     extra_plugins: |
+      #       @semantic-release/release-notes-generator@10.0.3
+      #       @semantic-release/git@10.0.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Docker buildx
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
       - name: Log in to the Container registry
         id: docker_login
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
@@ -55,7 +53,6 @@ jobs:
 
       - name: Docker meta
         uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
-        if: steps.release.outputs.new_release_published == 'true'
         id: meta
         with:
           images: |
@@ -72,7 +69,6 @@ jobs:
 
       - name: Build and push Docker image
         id: docker_build_push
-        if: steps.release.outputs.new_release_published == 'true'
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
