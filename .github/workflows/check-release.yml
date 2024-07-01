@@ -74,11 +74,21 @@ jobs:
             if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
               echo "No changes in release."
               echo "release_changed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Release has changed."
+              echo "release_changed=true" >> "$GITHUB_OUTPUT"
+              # Update release.json
+              jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+                '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+  
+              cat release.json
             fi
+  
           else
-            echo "Release has changed."
+            echo "Release is changed, file release.json does not exist."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
-            # Update release.json
+
+            # Create release.json
             jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
               '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
 
@@ -122,7 +132,7 @@ jobs:
           sed -i "1s|.*|$new_from|" Dockerfile
 
           echo "Dockerfile updated."
-          
+
       - name: Set up Git
         run: |
           git config --global user.email "action@github.com"
