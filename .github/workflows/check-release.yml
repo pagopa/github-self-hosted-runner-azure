@@ -32,5 +32,32 @@ jobs:
             
       - name: Debug latest release
         run: |
+          echo "Latest release: ${{ steps.get_release.outputs.result }}"
           echo "Latest release tag: ${{ steps.get_release.outputs.result.tag_name }}"
           echo "Latest release sha: ${{ steps.get_release.outputs.result.sha }}"
+
+      - name: Get changelog file
+        id: changelog
+        run: |
+          if [ ! -f CHANGELOG.md ]; then
+            echo "Changelog file does not exist. Creating one..."
+            touch CHANGELOG.md
+          fi
+
+      - name: Update Changelog
+        id: update_changelog
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const changelogPath = 'CHANGELOG.md';
+            const latestRelease = {
+              tag_name: "${{ steps.get_release.outputs.result.tag_name }}"
+              sha: "${{ steps.get_release.outputs.result.sha }}"
+            };
+            const dockerImage = `docker pull ghcr.io/actions/runner:${latestRelease.tag_name}@sha256:${latestRelease.sha}`;
+  
+            const changelogEntry = `## ${latestRelease.tag_name}\n- Docker Image: \`${dockerImage}\`\n`;
+  
+            const changelogContent = fs.readFileSync(changelogPath, 'utf8');
+            fs.writeFileSync(changelogPath, `${changelogEntry}\n${changelogContent}`);
