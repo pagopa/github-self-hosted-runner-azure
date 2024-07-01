@@ -57,13 +57,9 @@ jobs:
           script: |
             const fs = require('fs');
             const changelogPath = 'CHANGELOG.md';
-            const latestRelease = {
-              tag_name: "${{ steps.release_outputs.outputs.tag_name }}"
-              sha: "${{ steps.release_outputs.outputs.sha }}"
-            };
-            const dockerImage = `docker pull ghcr.io/actions/runner:${latestRelease.tag_name}@sha256:${{ steps.release_outputs.outputs.sha }}`;
+            const dockerImage = `docker pull ghcr.io/actions/runner:${{ steps.release_outputs.outputs.tag_name }}@sha256:${{ steps.release_outputs.outputs.sha }}`;
   
-            const changelogEntry = `## ${latestRelease.tag_name}\n- Docker Image: \`${dockerImage}\`\n`;
+            const changelogEntry = `## ${{ steps.release_outputs.outputs.tag_name }}\n- Docker Image: \`${dockerImage}\`\n`;
   
             const changelogContent = fs.readFileSync(changelogPath, 'utf8');
             fs.writeFileSync(changelogPath, `${changelogEntry}\n${changelogContent}`);
