@@ -101,9 +101,9 @@ jobs:
         id: update_dockerfile
         run: |
           echo "Updating Dockerfile..."
-
+          version_clean=${${{ steps.release_outputs.outputs.tag_name }}#v}
           # Construct the new FROM statement
-          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }} AS base"
+          new_from="FROM ghcr.io/actions/actions-runner:$version_clean@${{ steps.get_digests.outputs.arch_sha_name }} AS base"
           
           # Replace the first line with the new FROM statement
           sed -i "1s|.*|$new_from|" Dockerfile
