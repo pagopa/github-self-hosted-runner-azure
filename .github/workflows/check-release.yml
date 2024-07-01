@@ -60,6 +60,8 @@ jobs:
             echo "CURRENT_SHA=$new_sha" >> $GITHUB_ENV
             gh variable list -R github.com/actions/runner
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get changelog file
         id: changelog
