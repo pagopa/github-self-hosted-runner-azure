@@ -11,7 +11,10 @@ on:
 jobs:
   check-release:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      actions: write
+      
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         name: Checkout
@@ -132,6 +135,8 @@ jobs:
           git add CHANGELOG.md
           git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
           git push origin $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Create PR
       #   uses: peter-evans/create-pull-request@v3
