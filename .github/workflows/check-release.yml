@@ -33,11 +33,17 @@ jobs:
       - name: Debug latest release
         id: debug
         run: |
-          echo "Latest release: ${{ steps.get_release.outputs.result }}"
-          echo Latest release tag: ${{ steps.get_release.outputs.result }} | jq -r '.tag_name'
-          echo Latest release sha: ${{ steps.get_release.outputs.result }} | jq -r '.sha'
-          echo tag_name=${{ steps.get_release.outputs.result }} | jq -r '.tag_name' >> "$GITHUB_OUTPUT"
-          echo sha=${{ steps.get_release.outputs.result }} | jq -r '.sha' >> "$GITHUB_OUTPUT"
+          release_info="${{ steps.get_release.outputs.result }}"
+          echo "Release info: $release_info"
+  
+          tag_name=$(echo "$release_info" | jq -r '.tag_name')
+          sha=$(echo "$release_info" | jq -r '.sha')
+  
+          echo "Tag name: $tag_name"
+          echo "SHA: $sha"
+
+          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Get changelog file
         id: changelog
