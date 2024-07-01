@@ -122,5 +122,21 @@ jobs:
           sed -i "1s|.*|$new_from|" Dockerfile
 
           echo "Dockerfile updated."
-          cat Dockerfile
-          cat release.json
+
+      - name: Create branch
+        run: |
+          BRANCH_NAME="update-release-to-${{ steps.release_outputs.outputs.tag_name }}"
+          git checkout -b $BRANCH_NAME
+          git add release.json
+          git add Dockerfile
+          git add CHANGELOG.md
+          git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
+          git push origin $BRANCH_NAME
+
+      # - name: Create PR
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     commit-message: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
+      #     title: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
+      #     branch: update-release-to-${{ steps.release_outputs.outputs.tag_name }}
+      #     base: main
