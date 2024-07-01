@@ -42,6 +42,24 @@ jobs:
           echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
+      - name: Check if release has changed
+        id: check_release_changes
+        run: |
+          current_tag=${{ env.CURRENT_TAG }}
+          current_sha=${{ env.CURRENT_SHA }}
+          new_tag=${{ steps.release_outputs.outputs.tag_name }}
+          new_sha=${{ steps.release_outputs.outputs.sha }}
+
+          if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
+            echo "No changes in release."
+            echo "release_changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release has changed."
+            echo "release_changed=true" >> "$GITHUB_OUTPUT"
+            echo "CURRENT_TAG=$new_tag" >> $GITHUB_ENV
+            echo "CURRENT_SHA=$new_sha" >> $GITHUB_ENV
+          fi
+
       - name: Get changelog file
         id: changelog
         run: |
@@ -51,6 +69,7 @@ jobs:
           fi
 
       - name: Update Changelog
+        if: steps.check_release_changes.outputs.release_changed == 'true'
         id: update_changelog
         uses: actions/github-script@v7
         with:
@@ -64,5 +83,22 @@ jobs:
             const changelogContent = fs.readFileSync(changelogPath, 'utf8');
             fs.writeFileSync(changelogPath, `${changelogEntry}\n${changelogContent}`);
     
+      - name: Update Dockerfile
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: update_dockerfile
+        run: |
+          echo "Updating Dockerfile..."
+
+          # Construct the new FROM statement
+          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.release_outputs.outputs.sha }} AS base
+          
+          # Replace the first line with the new FROM statement
+          sed -i "1s/.*/$new_from/" Dockerfile
+
+          echo "Dockerfile updated."
+          cat Dockerfile
+
       - name: Debug changelog file
-        run: cat CHANGELOG.md
+        run: |
+          echo "CHANGELOG.md content:"
+          cat CHANGELOG.md
