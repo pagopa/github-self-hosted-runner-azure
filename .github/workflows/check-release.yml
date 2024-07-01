@@ -29,3 +29,8 @@ jobs:
               tag_name: latestRelease.data.tag_name,
               sha: latestRelease.data.target_commitish,
             };
+            
+      - name: Debug latest release
+        run: |
+          echo "Latest release tag: ${{ steps.get_release.outputs.tag_name }}"
+          echo "Latest release sha: ${{ steps.get_release.outputs.sha }}"
