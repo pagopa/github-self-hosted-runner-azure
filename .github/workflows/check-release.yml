@@ -146,7 +146,7 @@ jobs:
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
 
-          branch_name="update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
+          echo "branch_name=update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
 
       - name: Create branch
         if: steps.check_release_changes.outputs.release_changed == 'true'
@@ -182,8 +182,8 @@ jobs:
             {emoji} *{workflow}* Release:
             - Tag: ${{ steps.release_outputs.outputs.tag_name }}
             - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
-            - Docker Image: ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}>
-            - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}>
-          footer: "Linked Repo <{repo_url}|{repo}>/tree/${{ steps.git_setup.outputs.branch_name }}"
+            - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
+            - Docker Image: ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}
+          footer: "Linked Repo <{repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}|{repo}/${{ steps.git_setup.outputs.branch_name }}"
         env:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
