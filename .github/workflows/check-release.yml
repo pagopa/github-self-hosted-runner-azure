@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -172,18 +172,17 @@ jobs:
       #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       # How to configure: https://github.com/ravsamhq/notify-slack-action
-      - name: Drift Notification
-        if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
-        uses: ravsamhq/notify-slack-action@2.3.0
-        with:
-          status: ${{ job.status }}
-          notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
-          message_format: |
-            {emoji} *{workflow}* Release:
-            - Tag: ${{ steps.release_outputs.outputs.tag_name }}
-            - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
-            - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
-            - Docker Image: ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}
-          footer: "Linked Repo <{repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}|{repo}/${{ steps.git_setup.outputs.branch_name }}"
-        env:
-          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+      # - name: Drift Notification
+      #   if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
+      #   uses: ravsamhq/notify-slack-action@2.3.0
+      #   with:
+      #     status: ${{ job.status }}
+      #     notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+      #     message_format: |
+      #       {emoji} *{workflow}* Release:
+      #       - Tag: ${{ steps.release_outputs.outputs.tag_name }}
+      #       - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
+      #       - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
+      #     footer: "Linked Repo {repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}"
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
