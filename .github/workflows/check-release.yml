@@ -26,7 +26,7 @@ jobs:
               repo: 'runner'
             });
             console.log(JSON.stringify(latestRelease.data.assets));
-            const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-amd64'));
+            const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-x64'));
 
             if (!asset) {
               throw new Error('Could not find linux/amd64 asset in the release');
