@@ -39,7 +39,7 @@ jobs:
           script: |
             const owner = 'actions';
             const repo = 'runner';
-            const packageName = 'actions-runner';
+            const packageName = 'ghcr.io/actions/runner';
 
             const packages = await github.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
               package_type: 'container',
