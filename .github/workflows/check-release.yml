@@ -25,10 +25,11 @@ jobs:
               owner: 'actions',
               repo: 'runner'
             });
-            return {
+            const releaseInfo = {
               tag_name: latestRelease.data.tag_name,
               sha: latestRelease.data.target_commitish,
             };
+            console.log(JSON.stringify(releaseInfo));
             
       - name: Debug latest release
         id: debug
