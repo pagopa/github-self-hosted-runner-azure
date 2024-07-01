@@ -63,3 +63,6 @@ jobs:
   
             const changelogContent = fs.readFileSync(changelogPath, 'utf8');
             fs.writeFileSync(changelogPath, `${changelogEntry}\n${changelogContent}`);
+    
+      - name: Debug changelog file
+        run: cat CHANGELOG.md
