@@ -60,7 +60,7 @@ jobs:
       # Check if the release has changed
       # if release.json file exist and the current tag and sha are the same as the latest release, then no changes have been made
       # if release.json file does not exist or exist but the current tag and sha are different, then the release will be considered as changed
-      
+
       - name: Check if release has changed
         id: check_release_changes
         run: |
@@ -74,7 +74,7 @@ jobs:
             if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
               echo "No changes in release."
               echo "release_changed=false" >> "$GITHUB_OUTPUT"
-
+            fi
           else
             echo "Release has changed."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
