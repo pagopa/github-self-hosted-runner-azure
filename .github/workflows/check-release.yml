@@ -41,9 +41,6 @@ jobs:
             const repo = 'runner';
             const packageName = 'actions/actions-runner';
 
-            const octokit = new Octokit({
-              auth: '${{ secrets.GITHUB_TOKEN }}',
-            });
             const packages = await github.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
               package_type: 'container',
               package_name: packageName,
