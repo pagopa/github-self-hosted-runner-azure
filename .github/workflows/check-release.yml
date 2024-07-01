@@ -32,6 +32,5 @@ jobs:
             
       - name: Debug latest release
         run: |
-          echo "Latest release: ${{ steps.get_release.outputs.result }}"
-          echo "Latest release tag: ${{ steps.get_release.outputs.tag_name }}"
-          echo "Latest release sha: ${{ steps.get_release.outputs.sha }}"
+          echo "Latest release tag: ${{ steps.get_release.outputs.result.tag_name }}"
+          echo "Latest release sha: ${{ steps.get_release.outputs.result.sha }}"
