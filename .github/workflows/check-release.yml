@@ -37,7 +37,9 @@ jobs:
               repo: 'runner',
               asset_id: asset.id
             });
-
+            console.log(JSON.stringify(assetDetails));
+            console.log(JSON.stringify(latestRelease));
+            console.log(JSON.stringify(latestRelease.data));
             const releaseInfo = {
               tag_name: latestRelease.data.tag_name,
               sha: assetDetails.data.target_commitish,
