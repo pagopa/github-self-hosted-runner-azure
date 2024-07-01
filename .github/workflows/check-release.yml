@@ -123,3 +123,4 @@ jobs:
 
           echo "Dockerfile updated."
           cat Dockerfile
+          cat release.json
