@@ -41,29 +41,12 @@ jobs:
             const repo = 'runner';
             const packageName = 'actions/actions-runner';
 
-            const versions = await github.rest.packages.listPackageVersionsForPackageOwnedByOrg({
+            const packages = await github.rest.packages.listPackagesForOrganization({
               package_type: 'container',
-              package_name: packageName,
               org: owner,
-              per_page: 1,
             });
 
-            if (versions.data.length === 0) {
-              throw new Error('No versions found for the specified package.');
-            }
-
-            const version = versions.data[0];
-            const files = version.metadata.container.tags;
-
-            const digests = {};
-            for (const file of files) {
-              const tag = file.tag;
-              if (file.digest) {
-                digests[tag] = file.digest;
-              }
-            }
-
-            console.log(digests);
+            console.log(packages);
 
       - name: Define release outputs
         id: release_outputs
