@@ -45,8 +45,8 @@ jobs:
       - name: Check if release has changed
         id: check_release_changes
         run: |
-          current_tag=${{ env.CURRENT_TAG }}
-          current_sha=${{ env.CURRENT_SHA }}
+          current_tag=$(jq -r '.current_tag' release.json)
+          current_sha=$(jq -r '.current_sha' release.json)
           new_tag=${{ steps.release_outputs.outputs.tag_name }}
           new_sha=${{ steps.release_outputs.outputs.sha }}
 
@@ -56,12 +56,12 @@ jobs:
           else
             echo "Release has changed."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
-            echo "CURRENT_TAG=$new_tag" >> $GITHUB_ENV
-            echo "CURRENT_SHA=$new_sha" >> $GITHUB_ENV
-            gh variable list -R github.com/actions/runner
+            # Update release.json
+            jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+              '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+
+            cat release.json
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get changelog file
         id: changelog
