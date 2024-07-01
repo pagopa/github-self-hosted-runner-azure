@@ -25,28 +25,35 @@ jobs:
               owner: 'actions',
               repo: 'runner'
             });
-            
-            const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-x64'));
-
-            if (!asset) {
-              throw new Error('Could not find linux/amd64 asset in the release');
-            }
-
-            const assetDetails = await github.rest.repos.getReleaseAsset({
-              owner: 'actions',
-              repo: 'runner',
-              asset_id: asset.id
-            });
-            console.log(JSON.stringify(assetDetails));
-            console.log(JSON.stringify(latestRelease));
-            console.log(JSON.stringify(latestRelease.data));
             const releaseInfo = {
               tag_name: latestRelease.data.tag_name,
-              sha: assetDetails.data.target_commitish,
+              sha: latestRelease.data.target_commitish,
             };
             console.log(JSON.stringify(releaseInfo));
             return JSON.stringify(releaseInfo);
+
+      - name: Get Docker image digests
+        id: get_digests
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const response = await github.rest.packages.getPackageVersion({
+              package_type: 'container',
+              package_name: 'actions/runner',
+              package_version_id: 'latest',
+            });
+
+            const digests = {};
+            response.data.metadata.container.files.forEach(file => {
+              const parts = file.download_url.split('@');
+              const architecture = parts[0].split('/').pop(); // Extract architecture from download URL
+              const digest = parts[1]; // Extract digest from download URL
+              digests[architecture] = digest;
+            });
+
+            console.log(JSON.stringify(digests));
             
+
       - name: Define release outputs
         id: release_outputs
         run: |
