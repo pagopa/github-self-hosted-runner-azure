@@ -25,16 +25,22 @@ jobs:
               owner: 'actions',
               repo: 'runner'
             });
-            console.log(JSON.stringify(latestRelease.data.assets));
+            
             const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-x64'));
 
             if (!asset) {
               throw new Error('Could not find linux/amd64 asset in the release');
             }
 
+            const assetDetails = await github.rest.repos.getReleaseAsset({
+              owner: 'actions',
+              repo: 'runner',
+              asset_id: asset.id
+            });
+
             const releaseInfo = {
               tag_name: latestRelease.data.tag_name,
-              sha: asset.digest,
+              sha: assetDetails.data.target_commitish,
             };
             console.log(JSON.stringify(releaseInfo));
             return JSON.stringify(releaseInfo);
