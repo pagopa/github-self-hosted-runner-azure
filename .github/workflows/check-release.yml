@@ -40,13 +40,13 @@ jobs:
             const owner = 'actions';
             const repo = 'runner';
             const packageName = 'actions/actions-runner';
-
-            const packages = await github.rest.packages.listPackagesForOrganization({
+            cosnt packages + await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
               package_type: 'container',
+              package_name: packageName,
               org: owner,
-            });
+            }):
 
-            console.log(packages);
+            console.log(package);
 
       - name: Define release outputs
         id: release_outputs
