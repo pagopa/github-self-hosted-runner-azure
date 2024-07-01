@@ -141,20 +141,24 @@ jobs:
 
       - name: Set up Git
         if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: git_setup
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
 
+          branch_name="update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
+
       - name: Create branch
         if: steps.check_release_changes.outputs.release_changed == 'true'
         run: |
-          BRANCH_NAME="update-release-to-${{ steps.release_outputs.outputs.tag_name }}"
-          git checkout -b $BRANCH_NAME
+          git checkout -b ${{ steps.git_setup.outputs.branch_name }}
           git add release.json
           git add Dockerfile
           git add CHANGELOG.md
           git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
-          git push origin $BRANCH_NAME
+          git push origin ${{ steps.git_setup.outputs.branch_name }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       # - name: Create PR
       #   if: steps.check_release_changes.outputs.release_changed == 'true'
@@ -162,8 +166,10 @@ jobs:
       #   with:
       #     commit-message: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
       #     title: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
-      #     branch: update-release-to-${{ steps.release_outputs.outputs.tag_name }}
+      #     branch: ${{ steps.git_setup.outputs.branch_name }}
       #     base: main
+      #   env:
+      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       # How to configure: https://github.com/ravsamhq/notify-slack-action
       - name: Drift Notification
@@ -176,8 +182,8 @@ jobs:
             {emoji} *{workflow}* Release:
             - Tag: ${{ steps.release_outputs.outputs.tag_name }}
             - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
-            - Docker Image: <{repo_url}/releases/tag/${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}>
-            - Link: <{repo_url}/releases/tag/${{ steps.release_outputs.outputs.tag_name }}>
-          footer: "Linked Repo <{repo_url}|{repo}>"
+            - Docker Image: ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}>
+            - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}>
+          footer: "Linked Repo <{repo_url}|{repo}>/tree/${{ steps.git_setup.outputs.branch_name }}"
         env:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
