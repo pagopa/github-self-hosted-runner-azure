@@ -25,6 +25,7 @@ jobs:
               owner: 'actions',
               repo: 'runner'
             });
+            console.log(JSON.stringify(latestRelease.data.assets));
             const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-amd64'));
 
             if (!asset) {
