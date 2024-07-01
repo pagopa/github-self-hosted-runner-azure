@@ -40,7 +40,7 @@ jobs:
             const owner = 'actions';
             const repo = 'runner';
             const packageName = 'actions/actions-runner';
-            cosnt packages + await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
+            const packages + await octokit.request('GET /orgs/{org}/packages/{package_type}/{package_name}/versions', {
               package_type: 'container',
               package_name: packageName,
               org: owner,
