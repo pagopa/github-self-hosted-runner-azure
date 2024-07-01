@@ -25,9 +25,15 @@ jobs:
               owner: 'actions',
               repo: 'runner'
             });
+            const asset = latestRelease.data.assets.find(asset => asset.name.includes('linux-amd64'));
+
+            if (!asset) {
+              throw new Error('Could not find linux/amd64 asset in the release');
+            }
+
             const releaseInfo = {
               tag_name: latestRelease.data.tag_name,
-              sha: latestRelease.data.target_commitish,
+              sha: asset.digest,
             };
             console.log(JSON.stringify(releaseInfo));
             return JSON.stringify(releaseInfo);
