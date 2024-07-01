@@ -58,6 +58,7 @@ jobs:
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
             echo "CURRENT_TAG=$new_tag" >> $GITHUB_ENV
             echo "CURRENT_SHA=$new_sha" >> $GITHUB_ENV
+            gh variable list -R github.com/actions/runner
           fi
 
       - name: Get changelog file
@@ -90,7 +91,7 @@ jobs:
           echo "Updating Dockerfile..."
 
           # Construct the new FROM statement
-          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.release_outputs.outputs.sha }} AS base
+          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.release_outputs.outputs.sha }} AS base"
           
           # Replace the first line with the new FROM statement
           sed -i "1s/.*/$new_from/" Dockerfile
