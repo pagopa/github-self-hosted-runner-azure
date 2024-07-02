@@ -1,0 +1,170 @@
+name: Check for New Release and Update Dockerfile
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *' # Execute everyday at 9 AM
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        name: Checkout
+    
+      - name: Get latest release from another repo
+        id: get_release
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const latestRelease = await github.rest.repos.getLatestRelease({
+              owner: 'actions',
+              repo: 'runner'
+            });
+            const releaseInfo = {
+              tag_name: latestRelease.data.tag_name,
+              sha: latestRelease.data.target_commitish,
+            };
+            console.log(JSON.stringify(releaseInfo));
+            return JSON.stringify(releaseInfo);
+      
+      - name: Define release outputs
+        id: release_outputs
+        run: |
+          release_info="${{ steps.get_release.outputs.result }}"  
+          tag_name=$(echo "$release_info" | jq -r '.tag_name')
+          sha=$(echo "$release_info" | jq -r '.sha')
+          short_tag_name=$(echo "$tag_name" | sed 's/^v//')
+
+          echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "short_tag_name=$short_tag_name" >> "$GITHUB_OUTPUT"
+      
+      # Check if the release has changed
+      # if release.json file exist and the current tag and sha are the same as the latest release, then no changes have been made
+      # if release.json file does not exist or exist but the current tag and sha are different, then the release will be considered as changed
+
+      - name: Check if release has changed
+        id: check_release_changes
+        run: |
+          new_tag=${{ steps.release_outputs.outputs.tag_name }}
+          new_sha=${{ steps.release_outputs.outputs.sha }}
+
+          if [ -f release.json ]; then
+            current_tag=$(jq -r '.current_tag' release.json)
+            current_sha=$(jq -r '.current_sha' release.json)
+
+            if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
+              echo "No changes in release."
+              echo "release_changed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Release has changed."
+              echo "release_changed=true" >> "$GITHUB_OUTPUT"
+              # Update release.json
+              jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+                '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+  
+              cat release.json
+            fi
+  
+          else
+            echo "Release is changed, file release.json does not exist."
+            echo "release_changed=true" >> "$GITHUB_OUTPUT"
+
+            # Create release.json
+            jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+              '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+
+            cat release.json
+          fi
+
+      # Retrieve the SHA of the latest release for the linux/amd64 architecture.
+      # To accomplish this, we fetch all versions and identify the 5th version, which corresponds to the latest release with that specific architecture.
+      # Reference: https://docs.github.com/en/rest/packages/packages?apiVersion=2022-11-28#list-package-versions-for-a-package-owned-by-an-organization
+      ## NOTE: The SHA obtained in this step differs from the previous one, as it represents the branch commit SHA used for change verification.
+
+      - name: Get Docker image digests
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: get_digests
+        run: |
+          digests=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/actions/packages/container/actions-runner/versions)
+          latest_digest=$(echo "$digests" | jq -r '.[] | select(.metadata.container.tags | index("latest")) | .name')
+          echo $latest_digest
+          echo "arch_sha_name=$latest_digest" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+      - name: Get changelog file
+        id: changelog
+        run: |
+          if [ ! -f CHANGELOG.md ]; then
+            echo "Changelog file does not exist. Creating one..."
+            touch CHANGELOG.md
+          fi
+
+      - name: Update Changelog
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: update_changelog
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const changelogPath = 'CHANGELOG.md';
+            const dockerImage = `docker pull ghcr.io/actions/runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}`;
+  
+            const changelogEntry = `## ${{ steps.release_outputs.outputs.tag_name }}\n- Docker Image: \`${dockerImage}\`\n`;
+  
+            const changelogContent = fs.readFileSync(changelogPath, 'utf8');
+            fs.writeFileSync(changelogPath, `${changelogEntry}\n${changelogContent}`);
+    
+      - name: Update Dockerfile
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: update_dockerfile
+        run: |
+          echo "Updating Dockerfile..."
+          
+          # Construct the new FROM statement
+          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.short_tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }} AS base"
+          
+          # Replace the first line with the new FROM statement
+          sed -i "1s|.*|$new_from|" Dockerfile
+
+          echo "Dockerfile updated."
+      
+      ## NOTE: To permit the PR creation the option "Allow GitHub Actions to create and approve pull requests" must be enabled in Repository Settings -> Actions -> General.
+      # Reference: https://github.com/peter-evans/create-pull-request
+      #            https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request?tool=cli
+      - name: Create PR
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}'
+          title: '[${{ steps.release_outputs.outputs.short_tag_name }}] Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}'
+          delete-branch: true
+          base: main
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+      # How to configure: https://github.com/ravsamhq/notify-slack-action
+      - name: Drift Notification
+        if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
+        uses: ravsamhq/notify-slack-action@2.3.0
+        with:
+          status: ${{ job.status }}
+          notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+          message_format: |
+            {emoji} *{workflow}* Release:
+            - Tag: ${{ steps.release_outputs.outputs.tag_name }}
+            - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
+            - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
+          footer: "Linked Repo <{repo_url}|{repo}>"
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
