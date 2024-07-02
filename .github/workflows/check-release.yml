@@ -47,6 +47,7 @@ jobs:
         id: get_digests
         run: |
           digests=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/actions/packages/container/actions-runner/versions)
+          echo $digests
           name=$(echo "${digests}" | jq -r '.[4].name')
           echo $name
           echo "arch_sha_name=$name" >> "$GITHUB_OUTPUT"
@@ -148,17 +149,17 @@ jobs:
 
           echo "branch_name=update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
 
-      - name: Create branch
-        if: steps.check_release_changes.outputs.release_changed == 'true'
-        run: |
-          git checkout -b ${{ steps.git_setup.outputs.branch_name }}
-          git add release.json
-          git add Dockerfile
-          git add CHANGELOG.md
-          git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
-          git push origin ${{ steps.git_setup.outputs.branch_name }}
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      # - name: Create branch
+      #   if: steps.check_release_changes.outputs.release_changed == 'true'
+      #   run: |
+      #     git checkout -b ${{ steps.git_setup.outputs.branch_name }}
+      #     git add release.json
+      #     git add Dockerfile
+      #     git add CHANGELOG.md
+      #     git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
+      #     git push origin ${{ steps.git_setup.outputs.branch_name }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       # - name: Create PR
       #   if: steps.check_release_changes.outputs.release_changed == 'true'
