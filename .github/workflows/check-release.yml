@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 9 * * *' # Execute everyday at 9 AM
-  # push:
-  #   branches:
-  #     - EC-340-action-update-dockerfile
 
 jobs:
   check-release:
