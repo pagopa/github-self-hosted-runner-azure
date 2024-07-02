@@ -165,7 +165,6 @@ jobs:
             - Tag: ${{ steps.release_outputs.outputs.tag_name }}
             - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
             - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
-            - CHANGELOG: {repo_url}/blob/${{ steps.git_setup.outputs.branch_name }}/CHANGELOG.md
-          footer: "Linked Repo {repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}"
+          footer: "Linked Repo <{repo_url}|{repo}>"
         env:
           SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
