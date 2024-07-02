@@ -138,13 +138,6 @@ jobs:
           sed -i "1s|.*|$new_from|" Dockerfile
 
           echo "Dockerfile updated."
-
-      - name: Set up Git
-        if: steps.check_release_changes.outputs.release_changed == 'true'
-        id: git_setup
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
       
       ## NOTE: To permit the PR creation the option "Allow GitHub Actions to create and approve pull requests" must be enabled in Repository Settings -> Actions -> General.
       # Reference: https://github.com/peter-evans/create-pull-request
