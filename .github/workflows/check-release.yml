@@ -44,9 +44,11 @@ jobs:
           release_info="${{ steps.get_release.outputs.result }}"  
           tag_name=$(echo "$release_info" | jq -r '.tag_name')
           sha=$(echo "$release_info" | jq -r '.sha')
+          short_tag_name=$(echo "$tag_name" | sed 's/^v//')
 
           echo "tag_name=$tag_name" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "short_tag_name=$short_tag_name" >> "$GITHUB_OUTPUT"
       
       # Check if the release has changed
       # if release.json file exist and the current tag and sha are the same as the latest release, then no changes have been made
@@ -98,9 +100,7 @@ jobs:
           digests=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /orgs/actions/packages/container/actions-runner/versions)
           latest_digest=$(echo "$digests" | jq -r '.[] | select(.metadata.container.tags | index("latest")) | .name')
           echo $latest_digest
-          name=$(echo "${digests}" | jq -r '.[4].name')
-          echo $name
-          echo "arch_sha_name=$name" >> "$GITHUB_OUTPUT"
+          echo "arch_sha_name=$latest_digest" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
@@ -132,10 +132,9 @@ jobs:
         id: update_dockerfile
         run: |
           echo "Updating Dockerfile..."
-          version_clean=$(echo "${{ steps.release_outputs.outputs.tag_name }}" | sed 's/^v//')
-
+          
           # Construct the new FROM statement
-          new_from="FROM ghcr.io/actions/actions-runner:$version_clean@${{ steps.get_digests.outputs.arch_sha_name }} AS base"
+          new_from="FROM ghcr.io/actions/actions-runner:${{ steps.release_outputs.outputs.short_tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }} AS base"
           
           # Replace the first line with the new FROM statement
           sed -i "1s|.*|$new_from|" Dockerfile
@@ -151,17 +150,17 @@ jobs:
 
           echo "branch_name=update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
 
-      # - name: Create branch
-      #   if: steps.check_release_changes.outputs.release_changed == 'true'
-      #   run: |
-      #     git checkout -b ${{ steps.git_setup.outputs.branch_name }}
-      #     git add release.json
-      #     git add Dockerfile
-      #     git add CHANGELOG.md
-      #     git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
-      #     git push origin ${{ steps.git_setup.outputs.branch_name }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      - name: Create branch
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        run: |
+          git checkout -b ${{ steps.git_setup.outputs.branch_name }}
+          git add release.json
+          git add Dockerfile
+          git add CHANGELOG.md
+          git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
+          git push origin ${{ steps.git_setup.outputs.branch_name }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       # - name: Create PR
       #   if: steps.check_release_changes.outputs.release_changed == 'true'
