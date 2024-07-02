@@ -1,12 +1,12 @@
 name: Check for New Release and Update Dockerfile
 
 on:
-  # schedule:
-  #   - cron: '0 * * * *' # Execute every hour
   workflow_dispatch:
-  push:
-    branches:
-      - EC-340-action-update-dockerfile
+  schedule:
+    - cron: '0 9 * * *' # Execute everyday at 9 AM
+  # push:
+  #   branches:
+  #     - EC-340-action-update-dockerfile
 
 jobs:
   check-release:
@@ -14,6 +14,7 @@ jobs:
     permissions:
       id-token: write
       contents: write
+      pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -120,7 +121,7 @@ jobs:
           script: |
             const fs = require('fs');
             const changelogPath = 'CHANGELOG.md';
-            const dockerImage = `docker pull ghcr.io/actions/runner:${{ steps.release_outputs.outputs.tag_name }}@sha256:${{ steps.release_outputs.outputs.sha }}`;
+            const dockerImage = `docker pull ghcr.io/actions/runner:${{ steps.release_outputs.outputs.tag_name }}@${{ steps.get_digests.outputs.arch_sha_name }}`;
   
             const changelogEntry = `## ${{ steps.release_outputs.outputs.tag_name }}\n- Docker Image: \`${dockerImage}\`\n`;
   
@@ -147,44 +148,34 @@ jobs:
         run: |
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-
-          echo "branch_name=update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> "$GITHUB_OUTPUT"
-
-      - name: Create branch
+      
+      ## NOTE: To permit the PR creation the option "Allow GitHub Actions to create and approve pull requests" must be enabled in Repository Settings -> Actions -> General.
+      # Reference: https://github.com/peter-evans/create-pull-request
+      #            https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request?tool=cli
+      - name: Create PR
         if: steps.check_release_changes.outputs.release_changed == 'true'
-        run: |
-          git checkout -b ${{ steps.git_setup.outputs.branch_name }}
-          git add release.json
-          git add Dockerfile
-          git add CHANGELOG.md
-          git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
-          git push origin ${{ steps.git_setup.outputs.branch_name }}
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}'
+          title: '[${{ steps.release_outputs.outputs.short_tag_name }}] Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}'
+          delete-branch: true
+          base: main
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-      # - name: Create PR
-      #   if: steps.check_release_changes.outputs.release_changed == 'true'
-      #   uses: peter-evans/create-pull-request@v3
-      #   with:
-      #     commit-message: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
-      #     title: 'Update release to ${{ steps.release_outputs.outputs.tag_name }}'
-      #     branch: ${{ steps.git_setup.outputs.branch_name }}
-      #     base: main
-      #   env:
-      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-
       # How to configure: https://github.com/ravsamhq/notify-slack-action
-      # - name: Drift Notification
-      #   if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
-      #   uses: ravsamhq/notify-slack-action@2.3.0
-      #   with:
-      #     status: ${{ job.status }}
-      #     notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
-      #     message_format: |
-      #       {emoji} *{workflow}* Release:
-      #       - Tag: ${{ steps.release_outputs.outputs.tag_name }}
-      #       - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
-      #       - Link: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
-      #     footer: "Linked Repo {repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}"
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+      - name: Drift Notification
+        if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
+        uses: ravsamhq/notify-slack-action@2.3.0
+        with:
+          status: ${{ job.status }}
+          notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+          message_format: |
+            {emoji} *{workflow}* Release:
+            - Tag: ${{ steps.release_outputs.outputs.tag_name }}
+            - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
+            - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
+            - CHANGELOG: {repo_url}/blob/${{ steps.git_setup.outputs.branch_name }}/CHANGELOG.md
+          footer: "Linked Repo {repo_url}/tree/${{ steps.git_setup.outputs.branch_name }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
