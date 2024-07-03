@@ -150,10 +150,11 @@ jobs:
 
       - name: Create branch
         if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: create_branch
         run: |
           if git ls-remote --exit-code --heads origin  ${{ steps.git_setup.outputs.branch_name }}; then
             echo "Branch ${{ steps.git_setup.outputs.branch_name }} already exists"
-            echo "release_changed=false" >> "$GITHUB_OUTPUT"
+            echo "branch_exist=false" >> "$GITHUB_OUTPUT"
           else
             git checkout -b ${{ steps.git_setup.outputs.branch_name }}
             git add release.json
@@ -161,11 +162,12 @@ jobs:
             git add CHANGELOG.md
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
             git push origin ${{ steps.git_setup.outputs.branch_name }}
+            echo "branch_exist=true" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Create PR
-        if: steps.check_release_changes.outputs.release_changed == 'true'
+        if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
         run: |
           gh pr create --title 'fix: Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}' --body 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}' --base main --head ${{ steps.git_setup.outputs.branch_name }}
         env:
