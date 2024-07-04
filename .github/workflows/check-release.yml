@@ -22,7 +22,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
+      SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         name: Checkout
@@ -190,18 +190,30 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-      # # How to configure: https://github.com/ravsamhq/notify-slack-action
       # - name: Slack Notification
       #   if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
-      #   uses: ravsamhq/notify-slack-action@2.3.0
+      #   uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e #v1.26.0
       #   with:
-      #     status: ${{ job.status }}
-      #     notification_title: "New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
-      #     message_format: |
-      #       {emoji} *{workflow}* - Release:
-      #       - Tag: ${{ steps.release_outputs.outputs.tag_name }}
-      #       - Branch SHA: ${{ steps.release_outputs.outputs.sha }}
-      #       - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}
-      #     footer: "Linked Repo <{repo_url}|{repo}>"
+      #     payload: |
+      #       {
+      #         "text":"${{ job.status }}",
+      #         "blocks":[
+      #           {
+      #               "type":"section",
+      #               "text":{
+      #                 "type":"mrkdwn",
+      #                 "text":":white_check_mark: New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+      #               }
+      #           },
+      #           {
+      #               "type":"section",
+      #               "text":{
+      #                 "type":"mrkdwn",
+      #                 "text":"*Check for New Release and Update Dockerfile* - Release:\n - Tag: ${{ steps.release_outputs.outputs.tag_name }}\n - Branch SHA: ${{ steps.release_outputs.outputs.sha }}\n - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}\n *Linked Repo*: <${{ steps.workflow_data.outputs.repo_url }}|${{ steps.workflow_data.outputs.repo_name }}>\n"
+      #               }
+      #           }
+      #         ]
+      #       }
       #   env:
       #     SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+      #     SLACK_WEBHOOK_TYPE: ${{ env.SLACK_WEBHOOK_TYPE }}
