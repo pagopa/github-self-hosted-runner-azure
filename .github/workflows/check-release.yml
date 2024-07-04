@@ -2,11 +2,8 @@ name: Check Release and Update Dockerfile
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '0 9 * * *' # Execute everyday at 9 AM
-  push:
-    branches:
-      - EC-340-action-update-dockerfile
+  schedule:
+    - cron: '0 9 * * *' # Execute everyday at 9 AM
 
 env:
   CURRENT_TAG: ${{ vars.CURRENT_TAG }}
@@ -56,8 +53,6 @@ jobs:
           echo "short_tag_name=$short_tag_name" >> "$GITHUB_OUTPUT"
       
       # Check if the release has changed
-      # if release.json file exist and the current tag and sha are the same as the latest release, then no changes have been made
-      # if release.json file does not exist or exist but the current tag and sha are different, then the release will be considered as changed
 
       - name: Check if release has changed
         id: check_release_changes
@@ -66,8 +61,8 @@ jobs:
           new_sha=${{ steps.release_outputs.outputs.sha }}
 
           if [ -f release.json ]; then
-            current_tag=${{ env.CURRENT_TAG }} # $(jq -r '.current_tag' release.json)
-            current_sha=${{ env.CURRENT_SHA }} # $(jq -r '.current_sha' release.json)
+            current_tag=${{ env.CURRENT_TAG }}
+            current_sha=${{ env.CURRENT_SHA }}
 
             if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
               echo "No changes in release."
@@ -75,11 +70,8 @@ jobs:
             else
               echo "Release has changed."
               echo "release_changed=true" >> "$GITHUB_OUTPUT"
-              # Update release.json
-              # jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
-              #   '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
-              # cat release.json
 
+              # Update repository variables
               gh variable set CURRENT_TAG \
                 --body "$new_tag"
               gh variable set CURRENT_SHA \
@@ -90,11 +82,7 @@ jobs:
             echo "Release is changed, file release.json does not exist."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
 
-            # Create release.json
-            # jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
-            #   '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
-
-            # cat release.json
+            # Update repository variables
             gh variable set CURRENT_TAG \
               --body "$new_tag"
             gh variable set CURRENT_SHA \
@@ -165,55 +153,63 @@ jobs:
 
           echo "branch_name=update-release-to-${{ steps.release_outputs.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
-      # - name: Create branch
-      #   if: steps.check_release_changes.outputs.release_changed == 'true'
-      #   id: create_branch
-      #   run: |
-      #     if git ls-remote --exit-code --heads origin  ${{ steps.git_setup.outputs.branch_name }}; then
-      #       echo "Branch ${{ steps.git_setup.outputs.branch_name }} already exists"
-      #       echo "branch_exist=false" >> "$GITHUB_OUTPUT"
-      #     else
-      #       git checkout -b ${{ steps.git_setup.outputs.branch_name }}
-      #       git add release.json
-      #       git add Dockerfile
-      #       git add CHANGELOG.md
-      #       git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
-      #       git push origin ${{ steps.git_setup.outputs.branch_name }}
-      #       echo "branch_exist=true" >> "$GITHUB_OUTPUT"
-      #   env:
-      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      - name: Create branch
+        if: steps.check_release_changes.outputs.release_changed == 'true'
+        id: create_branch
+        run: |
+          if git ls-remote --exit-code --heads origin  ${{ steps.git_setup.outputs.branch_name }}; then
+            echo "Branch ${{ steps.git_setup.outputs.branch_name }} already exists"
+            echo "branch_exist=false" >> "$GITHUB_OUTPUT"
+          else
+            git checkout -b ${{ steps.git_setup.outputs.branch_name }}
+            git add release.json
+            git add Dockerfile
+            git add CHANGELOG.md
+            git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
+            git push origin ${{ steps.git_setup.outputs.branch_name }}
+            echo "branch_exist=true" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-      # - name: Create PR
-      #   if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
-      #   run: |
-      #     gh pr create --title 'fix: Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}' --body 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}' --base main --head ${{ steps.git_setup.outputs.branch_name }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      - name: Create PR
+        if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
+        run: |
+          gh pr create --title 'fix: Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}' --body 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}' --base main --head ${{ steps.git_setup.outputs.branch_name }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-      # - name: Slack Notification
-      #   if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
-      #   uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e #v1.26.0
-      #   with:
-      #     payload: |
-      #       {
-      #         "text":"${{ job.status }}",
-      #         "blocks":[
-      #           {
-      #               "type":"section",
-      #               "text":{
-      #                 "type":"mrkdwn",
-      #                 "text":":white_check_mark: New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
-      #               }
-      #           },
-      #           {
-      #               "type":"section",
-      #               "text":{
-      #                 "type":"mrkdwn",
-      #                 "text":"*Check for New Release and Update Dockerfile* - Release:\n - Tag: ${{ steps.release_outputs.outputs.tag_name }}\n - Branch SHA: ${{ steps.release_outputs.outputs.sha }}\n - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}\n *Linked Repo*: <${{ steps.workflow_data.outputs.repo_url }}|${{ steps.workflow_data.outputs.repo_name }}>\n"
-      #               }
-      #           }
-      #         ]
-      #       }
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
-      #     SLACK_WEBHOOK_TYPE: ${{ env.SLACK_WEBHOOK_TYPE }}
+      - name: Slack Notification
+        if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e #v1.26.0
+        with:
+          payload: |
+            {
+              "text":"${{ job.status }}",
+              "blocks":[
+                {
+                    "type":"section",
+                    "text":{
+                      "type":"mrkdwn",
+                      "text":":white_check_mark: New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+                    }
+                },
+                {
+                    "type":"section",
+                    "text":{
+                      "type":"mrkdwn",
+                      "text":"*Check for New Release and Update Dockerfile* - Release:\n - Tag: ${{ steps.release_outputs.outputs.tag_name }}\n - Branch SHA: ${{ steps.release_outputs.outputs.sha }}\n - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}\n"
+                    }
+                },
+                {
+                    "type":"section",
+                    "text":{
+                      "type":"mrkdwn",
+                      "text":"*Linked Repo*: <https://github.com/${{github.repository}}|${{github.repository}}>\n"
+                    }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: ${{ env.SLACK_WEBHOOK_TYPE }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
