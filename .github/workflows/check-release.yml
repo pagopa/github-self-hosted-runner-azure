@@ -101,7 +101,7 @@ jobs:
               --body "$new_sha"
           fi
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT_VARIABLES }}
+          GH_TOKEN: ${{ secrets.GH_PAT_VARIABLES }}
           
       # Retrieve the SHA of the latest release for the linux/amd64 architecture.
       # To accomplish this, we fetch all versions and identify the 5th version, which corresponds to the latest release with that specific architecture.
