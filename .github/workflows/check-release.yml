@@ -1,4 +1,4 @@
-name: Check for New Release and Update Dockerfile
+name: Check Release and Update Dockerfile
 
 on:
   workflow_dispatch:
