@@ -60,26 +60,14 @@ jobs:
           new_tag=${{ steps.release_outputs.outputs.tag_name }}
           new_sha=${{ steps.release_outputs.outputs.sha }}
 
-          if [ -f release.json ]; then
-            current_tag=${{ env.CURRENT_TAG }}
-            current_sha=${{ env.CURRENT_SHA }}
+          current_tag=${{ env.CURRENT_TAG }}
+          current_sha=${{ env.CURRENT_SHA }}
 
-            if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
-              echo "No changes in release."
-              echo "release_changed=false" >> "$GITHUB_OUTPUT"
-            else
-              echo "Release has changed."
-              echo "release_changed=true" >> "$GITHUB_OUTPUT"
-
-              # Update repository variables
-              gh variable set CURRENT_TAG \
-                --body "$new_tag"
-              gh variable set CURRENT_SHA \
-                --body "$new_sha"
-            fi
-  
+          if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
+            echo "No changes in release."
+            echo "release_changed=false" >> "$GITHUB_OUTPUT"
           else
-            echo "Release is changed, file release.json does not exist."
+            echo "Release has changed."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
 
             # Update repository variables
@@ -162,7 +150,6 @@ jobs:
             echo "branch_exist=false" >> "$GITHUB_OUTPUT"
           else
             git checkout -b ${{ steps.git_setup.outputs.branch_name }}
-            git add release.json
             git add Dockerfile
             git add CHANGELOG.md
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
