@@ -11,15 +11,14 @@ env:
 
 jobs:
   check-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    environment: prod
     permissions:
       id-token: write
       contents: write
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         name: Checkout
@@ -92,8 +91,6 @@ jobs:
           latest_digest=$(echo "$digests" | jq -r '.[] | select(.metadata.container.tags | index("latest")) | .name')
           echo $latest_digest
           echo "arch_sha_name=$latest_digest" >> "$GITHUB_OUTPUT"
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Get changelog file
         id: changelog
@@ -155,15 +152,11 @@ jobs:
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
             git push origin ${{ steps.git_setup.outputs.branch_name }}
             echo "branch_exist=true" >> "$GITHUB_OUTPUT"
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Create PR
         if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
         run: |
           gh pr create --title 'fix: Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}' --body 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}' --base main --head ${{ steps.git_setup.outputs.branch_name }}
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - name: Slack Notification
         if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
@@ -197,6 +190,5 @@ jobs:
               ]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ env.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: ${{ env.SLACK_WEBHOOK_TYPE }}
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
