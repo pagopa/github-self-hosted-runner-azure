@@ -2,6 +2,9 @@ name: Check Release and Update Dockerfile
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - EC-340-action-update-dockerfile
   schedule:
     - cron: '0 9 * * *' # Execute everyday at 9 AM
 
@@ -23,6 +26,12 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         name: Checkout
     
+      - name: Test variables update
+        run: |
+          # Update repository variables
+          gh variable set TEST_VARIABLE \
+            --body "test_value -e tmp"
+
       - name: Get latest release from another repo
         id: get_release
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
