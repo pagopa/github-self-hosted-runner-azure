@@ -144,14 +144,14 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads origin  ${{ steps.git_setup.outputs.branch_name }}; then
             echo "Branch ${{ steps.git_setup.outputs.branch_name }} already exists"
-            echo "branch_exist=false" >> "$GITHUB_OUTPUT"
+            echo "branch_exist=true" >> "$GITHUB_OUTPUT"
           else
             git checkout -b ${{ steps.git_setup.outputs.branch_name }}
             git add Dockerfile
             git add CHANGELOG.md
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
             git push origin ${{ steps.git_setup.outputs.branch_name }}
-            echo "branch_exist=true" >> "$GITHUB_OUTPUT"
+            echo "branch_exist=false" >> "$GITHUB_OUTPUT"
 
       - name: Create PR
         if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
