@@ -174,43 +174,44 @@ jobs:
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
             git push origin ${{ steps.git_setup.outputs.branch_name }}
             echo "branch_exist=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Create PR
         if: ${{ steps.check_release_changes.outputs.release_changed == 'true' && steps.create_branch.outputs.branch_exist == 'false' }}
         run: |
           gh pr create --title 'fix: Update Dockerfile image Release to ${{ steps.release_outputs.outputs.tag_name }}' --body 'Update Dockerfile image release to ${{ steps.release_outputs.outputs.tag_name }} with sha ${{ steps.get_digests.outputs.arch_sha_name }}' --base main --head ${{ steps.git_setup.outputs.branch_name }}
 
-      - name: Slack Notification
-        if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
-        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e #v1.26.0
-        with:
-          payload: |
-            {
-              "text":"${{ job.status }}",
-              "blocks":[
-                {
-                    "type":"section",
-                    "text":{
-                      "type":"mrkdwn",
-                      "text":":white_check_mark: New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
-                    }
-                },
-                {
-                    "type":"section",
-                    "text":{
-                      "type":"mrkdwn",
-                      "text":"*Check for New Release and Update Dockerfile* - Release:\n - Tag: ${{ steps.release_outputs.outputs.tag_name }}\n - Branch SHA: ${{ steps.release_outputs.outputs.sha }}\n - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}\n"
-                    }
-                },
-                {
-                    "type":"section",
-                    "text":{
-                      "type":"mrkdwn",
-                      "text":"*Linked Repo*: <https://github.com/${{github.repository}}|${{github.repository}}>\n"
-                    }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      # - name: Slack Notification
+      #   if: ${{ always() && (env.SLACK_WEBHOOK_URL) && steps.check_release_changes.outputs.release_changed == 'true' }}
+      #   uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e #v1.26.0
+      #   with:
+      #     payload: |
+      #       {
+      #         "text":"${{ job.status }}",
+      #         "blocks":[
+      #           {
+      #               "type":"section",
+      #               "text":{
+      #                 "type":"mrkdwn",
+      #                 "text":":white_check_mark: New Release identified [${{ steps.release_outputs.outputs.tag_name }}]"
+      #               }
+      #           },
+      #           {
+      #               "type":"section",
+      #               "text":{
+      #                 "type":"mrkdwn",
+      #                 "text":"*Check for New Release and Update Dockerfile* - Release:\n - Tag: ${{ steps.release_outputs.outputs.tag_name }}\n - Branch SHA: ${{ steps.release_outputs.outputs.sha }}\n - Release URL: https://github.com/actions/runner/releases/tag/${{ steps.release_outputs.outputs.tag_name }}\n"
+      #               }
+      #           },
+      #           {
+      #               "type":"section",
+      #               "text":{
+      #                 "type":"mrkdwn",
+      #                 "text":"*Linked Repo*: <https://github.com/${{github.repository}}|${{github.repository}}>\n"
+      #               }
+      #           }
+      #         ]
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
