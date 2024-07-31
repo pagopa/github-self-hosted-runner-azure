@@ -5,10 +5,6 @@ on:
   schedule:
     - cron: '0 9 * * *' # Execute everyday at 9 AM
 
-env:
-  CURRENT_TAG: ${{ vars.CURRENT_TAG }}
-  CURRENT_SHA: ${{ vars.CURRENT_SHA }}
-
 jobs:
   check-release:
     runs-on: ubuntu-22.04
