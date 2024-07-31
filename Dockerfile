@@ -1,4 +1,4 @@
-FROM ghcr.io/actions/actions-runner:2.317.0@sha256:95db6fbb020b9f734e8a00389291dae766f0e6ad3d1171ae2d68e9ad8ac4a985 AS base
+FROM ghcr.io/actions/actions-runner:2.318.0@sha256:b05be064f0b30ac9d1ec0526f9429f7df2da45379b0cf50f1fda97793e1bd416 AS base
 
 USER root
 
