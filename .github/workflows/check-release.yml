@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 9 * * *' # Execute everyday at 9 AM
+  push:
+    branches:
+      - EC-340-action-update-dockerfile
 
 env:
   CURRENT_TAG: ${{ vars.CURRENT_TAG }}
@@ -52,31 +55,49 @@ jobs:
           echo "short_tag_name=$short_tag_name" >> "$GITHUB_OUTPUT"
       
       # Check if the release has changed
-
+      # if release.json file exist and the current tag and sha are the same as the latest release, then no changes have been made
+      # if release.json file does not exist or exist but the current tag and sha are different, then the release will be considered as changed
+      
       - name: Check if release has changed
         id: check_release_changes
         run: |
           new_tag=${{ steps.release_outputs.outputs.tag_name }}
           new_sha=${{ steps.release_outputs.outputs.sha }}
+          
+          if [ -f release.json ]; then
+            current_tag=$(jq -r '.current_tag' release.json) # ${{ env.CURRENT_TAG }}
+            current_sha=$(jq -r '.current_sha' release.json) # ${{ env.CURRENT_SHA }} 
 
-          current_tag=${{ env.CURRENT_TAG }}
-          current_sha=${{ env.CURRENT_SHA }}
+            if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
+              echo "No changes in release."
+              echo "release_changed=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "Release has changed."
+              echo "release_changed=true" >> "$GITHUB_OUTPUT"
 
-          if [[ "$current_tag" == "$new_tag" && "$current_sha" == "$new_sha" ]]; then
-            echo "No changes in release."
-            echo "release_changed=false" >> "$GITHUB_OUTPUT"
+              # Update release.json
+              jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+                '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+              cat release.json
+
+              # Update repository variables
+              # gh variable set CURRENT_TAG \
+              #   --body "$new_tag"
+              # gh variable set CURRENT_SHA \
+              #   --body "$new_sha"
+            fi
           else
-            echo "Release has changed."
+            echo "Release is changed, file release.json does not exist."
             echo "release_changed=true" >> "$GITHUB_OUTPUT"
 
-            # Update repository variables
-            gh variable set CURRENT_TAG \
-              --body "$new_tag"
-            gh variable set CURRENT_SHA \
-              --body "$new_sha"
+            # Create release.json
+            jq -n --arg new_tag "$new_tag" --arg new_sha "$new_sha" \
+              '{current_tag: $new_tag, current_sha: $new_sha}' > release.json
+
+            cat release.json
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT_VARIABLES }}
+        # env:
+        #   GH_TOKEN: ${{ secrets.GH_PAT_VARIABLES }}
           
       # Retrieve the SHA of the latest release for the linux/amd64 architecture.
       # To accomplish this, we fetch all versions and identify the 5th version, which corresponds to the latest release with that specific architecture.
@@ -147,6 +168,7 @@ jobs:
             echo "branch_exist=true" >> "$GITHUB_OUTPUT"
           else
             git checkout -b ${{ steps.git_setup.outputs.branch_name }}
+            git add release.json
             git add Dockerfile
             git add CHANGELOG.md
             git commit -m "Update release to ${{ steps.release_outputs.outputs.tag_name }}"
