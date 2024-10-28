@@ -84,6 +84,7 @@ else
     --disableupdate \
     --ephemeral \
     --replace \
+    --labels "$LABELS" \
     && ./run.sh
 
   export GITHUB_PAT=_REDACTED_
