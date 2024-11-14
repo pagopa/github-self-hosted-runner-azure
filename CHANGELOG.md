@@ -1,3 +1,6 @@
+## v2.321.0
+- Docker Image: `docker pull ghcr.io/actions/runner:v2.321.0@sha256:27f3f74ec6f88026491d761270525ccf630a53ce9cd5db1d5f44cd2470abe380`
+
 ## v2.320.0
 - Docker Image: `docker pull ghcr.io/actions/runner:v2.320.0@sha256:8de989a63c2dad8aeb7c44b70f86189d148f887cbd917ecbe83879df54bf6590`
 
