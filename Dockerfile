@@ -4,7 +4,7 @@ USER root
 
 RUN apt-get update \
     && apt-get -y install curl git \
-    && apt-get -y install  jq \
+    && apt-get -y install jq \
     && apt-get -y install zip unzip \
     && apt-get -y install build-essential \
     && apt-get -y install ca-certificates wget apt-transport-https lsb-release gnupg \
