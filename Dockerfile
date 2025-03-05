@@ -3,11 +3,12 @@ FROM ghcr.io/actions/actions-runner:2.322.0@sha256:c02e8e1b479ea39b196c3bb0a40a6
 USER root
 
 RUN apt-get update \
-    && apt-get -y install  curl git \
-    && apt-get -y install  jq \
-    && apt-get -y install  zip unzip \
-    && apt-get -y install  build-essential \
-    && apt-get -y install  ca-certificates wget apt-transport-https lsb-release gnupg \
+    && apt-get -y install curl git \
+    && apt-get -y install jq \
+    && apt-get -y install zip unzip \
+    && apt-get -y install build-essential \
+    && apt-get -y install openjdk-17-jdk \
+    && apt-get -y install ca-certificates wget apt-transport-https lsb-release gnupg \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/
 
@@ -64,6 +65,7 @@ RUN whoami \
   && echo "kubelogin client: $(kubelogin --version)" \
   && echo "helm: $(helm version)" \
   && echo "yq: $(yq --version)" \
+  && echo "java: $(java --version)" \
   && echo "node: $(node --version)" \
   && echo "npm: $(npm --version)" \
   && echo "yarn: $(yarn --version)"
