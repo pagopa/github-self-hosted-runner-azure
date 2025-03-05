@@ -29,6 +29,11 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+        with:
+          platforms: linux/amd64,linux/arm64
+
       - name: Release
         id: release
         uses: cycjimmy/semantic-release-action@a297eb166c8fba7ddd59ee3c3b873c9781cadc72 # v3.2.0
