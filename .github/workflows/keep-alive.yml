@@ -18,8 +18,10 @@ jobs:
   keep_alive:
     runs-on: 'ubuntu-latest'
     permissions:
-      contents: read
+      contents: write
       actions: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout
