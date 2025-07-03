@@ -53,7 +53,13 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-FROM deps-node-yarn AS final
+FROM  deps-node-yarn AS deps-docker-compose
+RUN apt-get update \
+    && apt-get install docker-compose-plugin \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM deps-docker-compose AS final
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
@@ -68,6 +74,7 @@ RUN whoami \
   && echo "java: $(java --version)" \
   && echo "node: $(node --version)" \
   && echo "npm: $(npm --version)" \
-  && echo "yarn: $(yarn --version)"
+  && echo "yarn: $(yarn --version)" \
+  && echo "docker-compose: $(docker-compose --version)" \
 
 ENTRYPOINT ["./entrypoint.sh"]
