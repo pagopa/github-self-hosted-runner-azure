@@ -75,6 +75,6 @@ RUN whoami \
   && echo "node: $(node --version)" \
   && echo "npm: $(npm --version)" \
   && echo "yarn: $(yarn --version)" \
-  && echo "docker-compose: $(docker-compose --version)" \
+  && echo "docker-compose: $(docker-compose --version)"
 
 ENTRYPOINT ["./entrypoint.sh"]
