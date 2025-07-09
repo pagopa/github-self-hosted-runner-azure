@@ -64,10 +64,6 @@ if [ -n "$GITHUB_REPOSITORY" ] && [ -n "$GITHUB_TOKEN" ]; then
 
 else
 
-  #
-  # JOB Container app configuration
-  #
-
   # Retrieve a short lived runner registration token using the PAT
   REGISTRATION_TOKEN="$(curl -X POST -fsSL \
     -H 'Accept: application/vnd.github.v3+json' \
