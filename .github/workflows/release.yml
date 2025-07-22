@@ -6,10 +6,12 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'CODEOWNERS'
-      - '**.md'
-      - '.**'
+    paths:
+      - 'Dockerfile'
+      - 'github-runner-entrypoint.sh'
+      - '.dockerignore'
+      - '.github/workflows/release.yml'
+      - 'release.json'
 
 env:
   REGISTRY: ghcr.io
@@ -59,8 +61,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker meta
-        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         if: steps.release.outputs.new_release_published == 'true'
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         id: meta
         with:
           images: |
@@ -76,8 +78,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Build and push Docker image
-        id: docker_build_push
         if: steps.release.outputs.new_release_published == 'true'
+        id: docker_build_push
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
         with:
           context: .
