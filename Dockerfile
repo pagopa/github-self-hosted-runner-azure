@@ -37,7 +37,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-FROM deps-kube AS deps-yq
+FROM deps-az AS deps-yq
 ENV YQ_VERSION="v4.47.1"
 ENV YQ_BINARY="yq_linux_amd64"
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
@@ -55,9 +55,20 @@ RUN apt-get update \
 
 FROM  deps-node-yarn AS deps-docker-compose
 RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/docker-compose 
+    && chmod +x /usr/local/bin/docker-compose
 
-FROM deps-docker-compose AS final
+FROM  deps-docker-compose AS deps-github-cli
+RUN (type -p wget >/dev/null || (apt update && apt install wget -y)) \
+	&& mkdir -p -m 755 /etc/apt/keyrings \
+	&& out=$(mktemp) && wget -nv -O$out https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+	&& cat $out | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+	&& chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+	&& mkdir -p -m 755 /etc/apt/sources.list.d \
+	&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+	&& apt update \
+	&& apt install gh -y
+
+FROM deps-github-cli AS final
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
@@ -73,6 +84,7 @@ RUN whoami \
   && echo "node: $(node --version)" \
   && echo "npm: $(npm --version)" \
   && echo "yarn: $(yarn --version)" \
-  && echo "docker-compose: $(docker-compose --version)"
+  && echo "docker-compose: $(docker-compose --version)" \
+  && echo "gh: $(gh --version)"
 
 ENTRYPOINT ["./entrypoint.sh"]
