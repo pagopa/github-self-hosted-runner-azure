@@ -37,7 +37,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-FROM deps-az AS deps-yq
+FROM deps-kube AS deps-yq
 ENV YQ_VERSION="v4.47.1"
 ENV YQ_BINARY="yq_linux_amd64"
 RUN wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | tar xz && mv ${YQ_BINARY} /usr/bin/yq
