@@ -30,10 +30,11 @@ ENV KUBELOGIN_VERSION="${ENV_KUBELOGIN_VERSION:-0.2.10}"
 RUN az aks install-cli --kubelogin-version "${KUBELOGIN_VERSION}"
 
 FROM deps-az AS deps-kube
-RUN curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
+RUN apt-get install curl gpg apt-transport-https --yes
+RUN curl -fsSL https://packages.buildkite.com/helm-linux/helm-debian/gpgkey | gpg --dearmor | tee /usr/share/keyrings/helm.gpg > /dev/null
+RUN echo "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main" | tee /etc/apt/sources.list.d/helm-stable-debian.list
 RUN apt-get update \
-    && apt-get satisfy "helm" -y \
+    && apt-get install helm -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -53,11 +54,17 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-FROM  deps-node-yarn AS deps-docker-compose
+FROM deps-node-yarn AS deps-docker-compose
 RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/docker-compose 
+    && chmod +x /usr/local/bin/docker-compose
 
-FROM deps-docker-compose AS final
+FROM deps-docker-compose AS deps-gh-cli
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg;
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null;
+RUN apt update \
+    && apt install -y gh
+
+FROM deps-gh-cli AS final
 COPY ./github-runner-entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
@@ -73,6 +80,7 @@ RUN whoami \
   && echo "node: $(node --version)" \
   && echo "npm: $(npm --version)" \
   && echo "yarn: $(yarn --version)" \
-  && echo "docker-compose: $(docker-compose --version)"
+  && echo "docker-compose: $(docker-compose --version)" \
+  && echo "gh: $(gh --version)"
 
 ENTRYPOINT ["./entrypoint.sh"]
