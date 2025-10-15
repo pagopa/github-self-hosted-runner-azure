@@ -1,4 +1,7 @@
 ## v2.329.0
+- Docker Image: `docker pull ghcr.io/actions/runner:v2.329.0@sha256:75599cd393958a52142f489a160123f5b9b21605a40609696deb13d49867d53f`
+
+## v2.329.0
 - Docker Image: upgrade kubelogin to version 0.2.10, yq to version 4.47.1
 
 ## v2.328.0
