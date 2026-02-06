@@ -62,7 +62,7 @@ if [ -n "$GITHUB_REPOSITORY" ] && [ -n "$GITHUB_TOKEN" ]; then
   ./run.sh
   echo "🚀 Executing GitHub Runner for $GITHUB_REPOSITORY"
 
-else
+elif [ -n "$GITHUB_PAT" ]; then
 
   # Retrieve a short lived runner registration token using the PAT
   REGISTRATION_TOKEN="$(curl -X POST -fsSL \
@@ -84,6 +84,76 @@ else
     && ./run.sh
 
   export GITHUB_PAT=_REDACTED_
+  export REGISTRATION_TOKEN=_REDACTED_
+
+else
+
+  app_id="$GITHUB_APP_ID"
+  pem_path="./key.pem"
+  printf '%b\n' "$GITHUB_APP_KEY" > $pem_path
+
+  now=$(date +%s)
+  iat=$((${now} - 60)) # Issues 60 seconds in the past
+  exp=$((${now} + 600)) # Expires 10 minutes in the future
+
+  b64enc() { openssl base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+
+  header_json='{
+      "typ":"JWT",
+      "alg":"RS256"
+  }'
+  # Header encode
+  header=$( echo -n "${header_json}" | b64enc )
+
+  payload_json="{
+      \"iat\":${iat},
+      \"exp\":${exp},
+      \"iss\":\"${app_id}\"
+  }"
+  # Payload encode
+  payload=$( echo -n "${payload_json}" | b64enc )
+
+  # Signature
+  header_payload="${header}"."${payload}"
+  signature=$(
+      openssl dgst -sha256 -sign "${pem_path}" \
+      <(echo -n "${header_payload}") | b64enc
+  )
+
+  # Create JWT
+  JWT="${header_payload}"."${signature}"
+
+  ACCESS_TOKEN="$(curl --request POST \
+    --header 'Accept: application/vnd.github+json' \
+    --header "Authorization: Bearer $JWT" \
+    --header 'X-GitHub-Api-Version: 2022-11-28' \
+    "https://api.github.com/app/installations/$GITHUB_APP_INSTALLATION_ID/access_tokens" \
+    | jq -r '.token')"
+
+  # Retrieve a short lived runner registration token using the ACCESS_TOKEN
+  REGISTRATION_TOKEN="$(curl -X POST -fsSL \
+    -H 'Accept: application/vnd.github.v3+json' \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H 'X-GitHub-Api-Version: 2022-11-28' \
+    "$REGISTRATION_TOKEN_API_URL" \
+    | jq -r '.token')"
+
+  #<https://docs.github.com/en/actions/hosting-your-own-runners/managing-self-hosted-runners>
+  ./config.sh \
+    --url "${REPO_URL}" \
+    --token "${REGISTRATION_TOKEN}" \
+    --unattended \
+    --disableupdate \
+    --ephemeral \
+    --replace \
+    --labels "$LABELS" \
+    && ./run.sh
+
+  rm $pem_path
+  export signature=_REDACTED_
+  export JWT=_REDACTED_
+  export GITHUB_APP_KEY=_REDACTED_
+  export ACCESS_TOKEN=_REDACTED_
   export REGISTRATION_TOKEN=_REDACTED_
 
 fi
