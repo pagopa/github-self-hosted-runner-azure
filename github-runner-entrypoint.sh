@@ -86,11 +86,13 @@ elif [ -n "$GITHUB_PAT" ]; then
   export GITHUB_PAT=_REDACTED_
   export REGISTRATION_TOKEN=_REDACTED_
 
-else
+elif [ -n "$GITHUB_APP_ID" ] && [ -n "$GITHUB_APP_KEY" ] && [ -n "$GITHUB_APP_INSTALLATION_ID" ] && [ -n "$REGISTRATION_TOKEN_API_URL" ] && [ -n "$REPO_URL" ]; then
 
   app_id="$GITHUB_APP_ID"
-  pem_path="./key.pem"
-  printf '%b\n' "$GITHUB_APP_KEY" > $pem_path
+  pem_path="$(mktemp /tmp/github-app-key.XXXXXX.pem)"
+  chmod 600 "$pem_path"
+  trap 'rm -f "$pem_path"' EXIT INT TERM HUP
+  printf '%b\n' "$GITHUB_APP_KEY" > "$pem_path"
 
   now=$(date +%s)
   iat=$((${now} - 60)) # Issues 60 seconds in the past
@@ -123,12 +125,17 @@ else
   # Create JWT
   JWT="${header_payload}"."${signature}"
 
-  ACCESS_TOKEN="$(curl --request POST \
+  ACCESS_TOKEN="$(curl -fsSL --request POST \
     --header 'Accept: application/vnd.github+json' \
     --header "Authorization: Bearer $JWT" \
     --header 'X-GitHub-Api-Version: 2022-11-28' \
     "https://api.github.com/app/installations/$GITHUB_APP_INSTALLATION_ID/access_tokens" \
     | jq -r '.token')"
+
+  if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "null" ]; then
+    echo "❌ Failed to retrieve GitHub App access token"
+    exit 1
+  fi
 
   # Retrieve a short lived runner registration token using the ACCESS_TOKEN
   REGISTRATION_TOKEN="$(curl -X POST -fsSL \
@@ -149,11 +156,19 @@ else
     --labels "$LABELS" \
     && ./run.sh
 
-  rm "$pem_path"
   export signature=_REDACTED_
   export JWT=_REDACTED_
   export GITHUB_APP_KEY=_REDACTED_
   export ACCESS_TOKEN=_REDACTED_
   export REGISTRATION_TOKEN=_REDACTED_
+
+else
+
+  echo "❌ No valid authentication method configured."
+  echo "Please set one of the following:"
+  echo "  - GITHUB_REPOSITORY and GITHUB_TOKEN (legacy)"
+  echo "  - GITHUB_PAT, REGISTRATION_TOKEN_API_URL, and REPO_URL"
+  echo "  - GITHUB_APP_ID, GITHUB_APP_KEY, GITHUB_APP_INSTALLATION_ID, REGISTRATION_TOKEN_API_URL, and REPO_URL"
+  exit 1
 
 fi
