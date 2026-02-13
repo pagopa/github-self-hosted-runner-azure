@@ -24,13 +24,13 @@ jobs:
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@1f9a0c22da41e6ebfa534300ef656657ea2c6707
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Docker meta
-        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         id: meta
         with:
           images: |
@@ -39,7 +39,7 @@ jobs:
             type=sha,enable=true,format=long
 
       - name: Build Docker image
-        uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
           load: true
@@ -51,7 +51,7 @@ jobs:
           platforms: linux/amd64
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@84384bd6e777ef152729993b8145ea352e9dd3ef # v0.17.0
+        uses: aquasecurity/trivy-action@c1824fd6edce30d7ab345a9989de00bbd46ef284 # v0.34.0
         with:
           image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}'
           format: 'sarif'
@@ -60,6 +60,6 @@ jobs:
           timeout: '10m0s'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@592977e6ae857384aa79bb31e7a1d62d63449ec5 # v2.16.3
+        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2 # v4.32.2
         with:
           sarif_file: 'trivy-results.sarif'
