@@ -1,0 +1,39 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm@sha256:2e826a6ae92e5744cc0a471a03b4411e64f6b7cc6af3adaecddad697f0018f10",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/act:1": {},
+    "ghcr.io/devcontainers/features/copilot-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/pagopa/devcontainer-features/shellcheck:1": {}
+  },
+  "postStartCommand": {
+    "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-websearchforcopilot",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "EditorConfig.EditorConfig",
+        "github.copilot",
+        "github.copilot-chat",
+        "eamodio.gitlens",
+        "docker.docker",
+        "ms-azuretools.vscode-docker"
+      ],
+      "mcp": {
+        "servers": {
+          "io.github.github/github-mcp-server": {
+            "type": "http",
+            "url": "https://api.githubcopilot.com/mcp/"
+          }
+        }
+      }
+    }
+  }
+}
