@@ -149,7 +149,7 @@ else
     --labels "$LABELS" \
     && ./run.sh
 
-  rm $pem_path
+  rm "$pem_path"
   export signature=_REDACTED_
   export JWT=_REDACTED_
   export GITHUB_APP_KEY=_REDACTED_
