@@ -92,7 +92,8 @@ elif [ -n "$GITHUB_APP_ID" ] && [ -n "$GITHUB_APP_KEY" ] && [ -n "$GITHUB_APP_IN
   pem_path="$(mktemp /tmp/github-app-key.XXXXXX.pem)"
   chmod 600 "$pem_path"
   trap 'rm -f "$pem_path"' EXIT INT TERM HUP
-  printf '%b\n' "$GITHUB_APP_KEY" > "$pem_path"
+  printf '%s' "$GITHUB_APP_KEY" | sed 's/\\n/\n/g' > "$pem_path"
+  wc -l "$pem_path"
 
   now=$(date +%s)
   iat=$((${now} - 60)) # Issues 60 seconds in the past
