@@ -92,7 +92,9 @@ elif [ -n "$GITHUB_APP_ID" ] && [ -n "$GITHUB_APP_KEY" ] && [ -n "$GITHUB_APP_IN
   pem_path="$(mktemp /tmp/github-app-key.XXXXXX.pem)"
   chmod 600 "$pem_path"
   trap 'rm -f "$pem_path"' EXIT INT TERM HUP
-  printf '%b\n' "$GITHUB_APP_KEY" > "$pem_path"
+  # GITHUB_APP_KEY must be base64-encoded (base64 -w0 key.pem) to avoid
+  # newline mangling by Azure Container Apps secret injection.
+  printf '%s' "$GITHUB_APP_KEY" | base64 -d > "$pem_path"
 
   now=$(date +%s)
   iat=$((${now} - 60)) # Issues 60 seconds in the past
