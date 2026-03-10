@@ -89,15 +89,12 @@ elif [ -n "$GITHUB_PAT" ]; then
 elif [ -n "$GITHUB_APP_ID" ] && [ -n "$GITHUB_APP_KEY" ] && [ -n "$GITHUB_APP_INSTALLATION_ID" ] && [ -n "$REGISTRATION_TOKEN_API_URL" ] && [ -n "$REPO_URL" ]; then
 
   app_id="$GITHUB_APP_ID"
-  echo "appid: $app_id"
-  echo "installationid: $GITHUB_APP_INSTALLATION_ID"
-  echo "key: $GITHUB_APP_KEY"
-  pem_path="./key.pem"
-  # pem_path="$(mktemp /tmp/github-app-key.XXXXXX.pem)"
+  pem_path="$(mktemp /tmp/github-app-key.XXXXXX.pem)"
   chmod 600 "$pem_path"
   trap 'rm -f "$pem_path"' EXIT INT TERM HUP
-  # printf '%b\n' "$GITHUB_APP_KEY" > "$pem_path"
-  printf '%s' "$GITHUB_APP_KEY" | sed 's/\\n/\n/g' > "$pem_path"
+  # GITHUB_APP_KEY must be base64-encoded (base64 -w0 key.pem) to avoid
+  # newline mangling by Azure Container Apps secret injection.
+  printf '%s' "$GITHUB_APP_KEY" | base64 -d > "$pem_path"
   wc -l "$pem_path"
   cat "$pem_path"
 
