@@ -95,8 +95,6 @@ elif [ -n "$GITHUB_APP_ID" ] && [ -n "$GITHUB_APP_KEY" ] && [ -n "$GITHUB_APP_IN
   # GITHUB_APP_KEY must be base64-encoded (base64 -w0 key.pem) to avoid
   # newline mangling by Azure Container Apps secret injection.
   printf '%s' "$GITHUB_APP_KEY" | base64 -d > "$pem_path"
-  wc -l "$pem_path"
-  cat "$pem_path"
 
   now=$(date +%s)
   iat=$((${now} - 60)) # Issues 60 seconds in the past
