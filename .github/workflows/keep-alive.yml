@@ -42,4 +42,4 @@ jobs:
       - name: Keep Alive
         # If 55 days have passed then execute the action which makes an empty push
         if: steps.commit_date.outputs.days_since_commit >= '55'
-        uses: pagopa/dx/.github/actions/keep-alive/@main
+        uses: pagopa/dx/.github/actions/keep-alive/@20d6a1621b0490a153ae57bba1f3d5daa624fd5f # main
