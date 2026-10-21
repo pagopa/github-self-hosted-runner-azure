@@ -23,6 +23,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Keep Alive
-        uses: pagopa/dx/actions/keep-alive/@main
+        uses: pagopa/dx/actions/keep-alive/@8007e5438cbdca3a7cd7a215d00b05d261539dc6 # main
         with:
           bot_token: ${{ secrets.GITHUB_TOKEN }}
